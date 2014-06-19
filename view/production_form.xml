@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!-- The COPYRIGHT file at the top level of this repository contains the full
+     copyright notices and license terms. -->
+<data>
+    <xpath expr="/form/field[@name='uom']" position="after">
+        <label name="subcontract_product"/>
+        <field name="subcontract_product"/>
+        <button name="create_purchase_request" string="Create Purchase Request"
+         colspan="2"/>
+    </xpath>
+    <xpath expr="/form/notebook/page[@id='other']/field[@name='location']"
+      position="after">
+        <label name="purchase_request"/>
+        <field name="purchase_request"/>
+        <label name="outgoing_shipment"/>
+        <field name="outgoing_shipment"/>
+        <label name="incoming_shipment"/>
+        <field name="incoming_shipment"/>
+    </xpath>
+</data>
