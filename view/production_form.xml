@@ -9,12 +9,14 @@
          colspan="2"/>
     </xpath>
     <xpath expr="/form/notebook/page[@id='other']/field[@name='location']"
-      position="after">
+        position="after">
         <label name="purchase_request"/>
         <field name="purchase_request"/>
-        <label name="outgoing_shipment"/>
-        <field name="outgoing_shipment"/>
+        <label name="supplier"/>
+        <field name="supplier"/>
         <label name="incoming_shipment"/>
         <field name="incoming_shipment"/>
+        <label name="destination_warehouse"/>
+        <field name="destination_warehouse"/>
     </xpath>
 </data>
