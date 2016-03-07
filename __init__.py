@@ -7,6 +7,7 @@ def register():
     Pool.register(
         Party,
         PurchaseRequest,
+        BOM,
         Production,
         Purchase,
-        module='production_external', type_='model')
+        module='production_subcontract', type_='model')
