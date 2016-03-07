@@ -2,8 +2,8 @@
 <!-- The COPYRIGHT file at the top level of this repository contains the full
      copyright notices and license terms. -->
 <data>
-    <xpath expr="/form/notebook/page[@id='stock']" position="inside">
-        <label name="production_warehouse"/>
-        <field name="production_warehouse"/>
+    <xpath expr="/tree/field[@name='name']" position="after">
+        <field name="subcontract_product"/>
     </xpath>
 </data>
+
