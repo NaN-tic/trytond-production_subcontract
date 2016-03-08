@@ -194,8 +194,8 @@ class Production:
             if 'outputs' in values:
                 to_update.extend(productions)
         super(Production, cls).write(*args)
-        if to_update:
-            Production._sync_outputs_to_shipment(to_update)
+        #if to_update:
+            #Production._sync_outputs_to_shipment(to_update)
 
     # TODO: Missing function to synchronize output production moves with
     # incoming internal shipment. Should emulate behaviour of ShipmentOut and
