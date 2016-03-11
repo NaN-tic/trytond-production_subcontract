@@ -145,10 +145,12 @@ class Production:
             subcontract_warehouse = production._get_subcontract_warehouse()
             production.destination_warehouse = production.warehouse
             production.warehouse = subcontract_warehouse
+            production.location = subcontract_warehouse.production_location
 
             from_location = production.warehouse.storage_location
             to_location = production.destination_warehouse.storage_location
             shipment = ShipmentInternal()
+            shipment.planned_date = production.planned_date
             shipment.from_location = from_location
             shipment.to_location = to_location
             shipment.moves = []
@@ -161,7 +163,7 @@ class Production:
             production.incoming_shipment = shipment
 
             storage_location = production.warehouse.storage_location
-            production_location = production.warehouse.production_location
+            production_location = production.location
             for move in production.inputs:
                 move.from_location = storage_location
                 move.to_location = production_location
