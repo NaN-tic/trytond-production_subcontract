@@ -204,6 +204,9 @@ class Production:
     # ShipmentIn where there is no direct linke between stock moves but are
     # calculated by product and quantities. See _sync_inventory_to_outgoing in
     # stock/shipment.py.
+    @classmethod
+    def _sync_outputs_to_shipment(cls, productions)
+        pass
 
     @classmethod
     @ModelView.button
