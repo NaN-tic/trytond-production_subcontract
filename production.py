@@ -41,6 +41,7 @@ class BOM:
             ('type', '=', 'service'),
             ])
 
+# TODO: Subcontract cost must be added to the cost of the production
 
 class Production:
     __name__ = 'production'
