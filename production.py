@@ -145,6 +145,7 @@ class Production:
             subcontract_warehouse = production._get_subcontract_warehouse()
             production.destination_warehouse = production.warehouse
             production.warehouse = subcontract_warehouse
+            production.location = production.warehouse.production_location
 
             from_location = production.warehouse.storage_location
             to_location = production.destination_warehouse.storage_location
