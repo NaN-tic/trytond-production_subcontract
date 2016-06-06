@@ -187,6 +187,13 @@ class Production:
         return self.purchase_request.party.production_warehouse
 
     @classmethod
+    def compute_request(cls, product, warehouse, quantity, date, company):
+        req = super(Production, cls).compute_request(product, warehouse, quantity, date, company)
+        if req.bom:
+            req.subcontract_product = req.bom.subcontract_product
+        return req
+
+    @classmethod
     def write(cls, *args):
         actions = iter(args)
         to_update = []
