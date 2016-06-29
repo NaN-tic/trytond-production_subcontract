@@ -1,7 +1,7 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
 from trytond.pool import Pool, PoolMeta
-from trytond.model import ModelView, Workflow, fields
+from trytond.model import ModelView, fields
 from trytond.pyson import Eval, Bool
 
 __all__ = ['Party', 'PurchaseRequest', 'BOM', 'Production', 'Purchase']
@@ -77,6 +77,16 @@ class Production:
                     'icon': 'tryton-go-home',
                     }
                 })
+        cls._error_messages.update({
+                'no_subcontract_warehouse': 'The party "%s" has no production '
+                    'location.',
+                'no_warehouse_production_location': 'The warehouse "%s" has '
+                    'no production location.',
+                'no_incoming_shipment': 'The production "%s" has no incoming '
+                    'shipment.',
+                'no_incoming_shipment_done': ('The production "%s" has no the '
+                    'incoming shipment "%s" as done.'),
+                })
 
     def get_supplier(self, name):
         return (self.purchase_request.party.id if self.purchase_request and
@@ -145,8 +155,14 @@ class Production:
             if production.destination_warehouse:
                 continue
             subcontract_warehouse = production._get_subcontract_warehouse()
+            if not subcontract_warehouse:
+                cls.raise_user_error('no_subcontract_warehouse', (
+                    production.purchase_request.party.rec_name, ))
             production.destination_warehouse = production.warehouse
             production.warehouse = subcontract_warehouse
+            if not production.warehouse.production_location:
+                cls.raise_user_error('no_warehouse_production_location', (
+                    production.warehouse.rec_name, ))
             production.location = production.warehouse.production_location
 
             from_location = production.warehouse.storage_location
@@ -217,8 +233,19 @@ class Production:
         pass
 
     @classmethod
-    @ModelView.button
-    @Workflow.transition('done')
+    def run(cls, productions):
+        for p in productions:
+            if p.purchase_request:
+                if not p.incoming_shipment:
+                    cls.raise_user_error('no_incoming_shipment', (
+                        p.code,))
+                if not p.incoming_shipment.state == 'done':
+                    cls.raise_user_error('no_incoming_shipment_done', (
+                        p.code, p.incoming_shipment.rec_name,))
+
+        super(Production, cls).run(productions)
+
+    @classmethod
     def done(cls, productions):
         InternalShipment = Pool().get('stock.shipment.internal')
         super(Production, cls).done(productions)

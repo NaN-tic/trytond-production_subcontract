@@ -2,6 +2,18 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
+msgctxt "error:production:"
+msgid "The production \"%s\" has no incoming shipment."
+msgstr "La producció \"%s\" no té l'albarà d'entrada."
+
+msgctxt "error:production:"
+msgid "The production \"%s\" has no the incoming shipment \"%s\" as done."
+msgstr "La producció \"%s\" no té l'albarà d'entrada \"%s\" en estat realitzat."
+
+msgctxt "error:production:"
+msgid "The warehouse \"%s\" has no production location."
+msgstr "El magatzem \"%s\" no té una ubicació de producció."
+
 msgctxt "field:party.party,production_warehouse:"
 msgid "Production Warehouse"
 msgstr "Magatzem producció"
