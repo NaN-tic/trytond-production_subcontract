@@ -1,0 +1,35 @@
+#
+msgid ""
+msgstr "Content-Type: text/plain; charset=utf-8\n"
+
+msgctxt "field:party.party,production_warehouse:"
+msgid "Production Warehouse"
+msgstr "Almacén producción"
+
+msgctxt "field:production,destination_warehouse:"
+msgid "Destination Warehouse"
+msgstr "Almacén destinación"
+
+msgctxt "field:production,incoming_shipment:"
+msgid "Incoming Shipment"
+msgstr "Albaranes de entrada"
+
+msgctxt "field:production,purchase_request:"
+msgid "Purchase Request"
+msgstr "Solicitud de compra"
+
+msgctxt "field:production,subcontract_product:"
+msgid "Subcontract Product"
+msgstr "Producto subcontractado"
+
+msgctxt "field:production,supplier:"
+msgid "Supplier"
+msgstr "Proveedor"
+
+msgctxt "field:production.bom,subcontract_product:"
+msgid "Subcontract Product"
+msgstr "Producto subcontractado"
+
+msgctxt "view:production:"
+msgid "Create Purchase Request"
+msgstr "Crear solicitud de compra"
