@@ -16,6 +16,7 @@ class Party:
                 ('type', '=', 'warehouse'),
                 ]))
 
+
 class PurchaseRequest:
     __name__ = 'purchase.request'
     __metaclass__ = PoolMeta
@@ -187,6 +188,13 @@ class Production:
 
     def _get_subcontract_warehouse(self):
         return self.purchase_request.party.production_warehouse
+
+    @classmethod
+    def compute_request(cls, product, warehouse, quantity, date, company):
+        req = super(Production, cls).compute_request(product, warehouse, quantity, date, company)
+        if req.bom:
+            req.subcontract_product = req.bom.subcontract_product
+        return req
 
     @classmethod
     def write(cls, *args):
