@@ -16,6 +16,7 @@ class Party:
                 ('type', '=', 'warehouse'),
                 ]))
 
+
 class PurchaseRequest:
     __name__ = 'purchase.request'
     __metaclass__ = PoolMeta
