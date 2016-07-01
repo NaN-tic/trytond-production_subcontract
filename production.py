@@ -150,7 +150,8 @@ class Production:
         for production in productions:
             if not (production.purchase_request and
                     production.purchase_request.purchase and
-                    production.purchase_request.purchase.state == 'processing'):
+                    production.purchase_request.purchase.state in
+                        ('processing', 'done')):
                 continue
             if production.destination_warehouse:
                 continue

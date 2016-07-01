@@ -58,6 +58,47 @@ Reload the context::
     >>> User = Model.get('res.user')
     >>> config._context = User.get_preferences(True, config.context)
 
+Create chart of accounts::
+
+    >>> AccountTemplate = Model.get('account.account.template')
+    >>> Account = Model.get('account.account')
+    >>> AccountJournal = Model.get('account.journal')
+    >>> account_template, = AccountTemplate.find([('parent', '=', None)])
+    >>> create_chart = Wizard('account.create_chart')
+    >>> create_chart.execute('account')
+    >>> create_chart.form.account_template = account_template
+    >>> create_chart.form.company = company
+    >>> create_chart.execute('create_account')
+    >>> receivable, = Account.find([
+    ...         ('kind', '=', 'receivable'),
+    ...         ('company', '=', company.id),
+    ...         ])
+    >>> payable, = Account.find([
+    ...         ('kind', '=', 'payable'),
+    ...         ('company', '=', company.id),
+    ...         ])
+    >>> revenue, = Account.find([
+    ...         ('kind', '=', 'revenue'),
+    ...         ('company', '=', company.id),
+    ...         ])
+    >>> expense, = Account.find([
+    ...         ('kind', '=', 'expense'),
+    ...         ('company', '=', company.id),
+    ...         ])
+    >>> create_chart.form.account_receivable = receivable
+    >>> create_chart.form.account_payable = payable
+    >>> create_chart.execute('create_properties')
+
+
+Create payment term::
+
+    >>> PaymentTerm = Model.get('account.invoice.payment_term')
+    >>> PaymentTermLine = Model.get('account.invoice.payment_term.line')
+    >>> payment_term = PaymentTerm(name='Direct')
+    >>> payment_term_line = PaymentTermLine(type='remainder', days=0)
+    >>> payment_term.lines.append(payment_term_line)
+    >>> payment_term.save()
+
 Create supplier warehouse::
 
     >>> Location = Model.get('stock.location')
@@ -68,10 +109,10 @@ Create supplier warehouse::
     >>> supplier_output = Location(name='Supplier Output', type='storage')
     >>> supplier_output.save()
     >>> supplier_production = Location(name='Supplier Production',
-    ...     type='storage')
+    ...     type='production')
     >>> supplier_production.save()
     >>> supplier_warehouse = Location()
-    >>> supplier_warehouse.type = 'warhouse'
+    >>> supplier_warehouse.type = 'warehouse'
     >>> supplier_warehouse.name = 'Supplier Warehouse'
     >>> supplier_warehouse.storage_location = supplier_storage
     >>> supplier_warehouse.input_location = supplier_input
@@ -84,6 +125,7 @@ Create supplier::
     >>> Party = Model.get('party.party')
     >>> party = Party(name='Supplier')
     >>> party.production_warehouse = supplier_warehouse
+    >>> party.save()
 
 Create product::
 
@@ -135,6 +177,9 @@ Create Subcontract Product::
     >>> stemplate.name = 'Subcontract'
     >>> stemplate.default_uom = unit
     >>> stemplate.type = 'service'
+    >>> stemplate.purchasable = True
+    >>> stemplate.account_expense = expense
+    >>> stemplate.account_revenue = revenue
     >>> stemplate.list_price = Decimal(0)
     >>> stemplate.cost_price = Decimal(100)
     >>> stemplate.save()
@@ -168,10 +213,11 @@ Create Bill of Material::
 
 Create an Inventory::
 
+    >>> warehouse, = Location.find(['code', '=', 'WH'])
     >>> Inventory = Model.get('stock.inventory')
     >>> InventoryLine = Model.get('stock.inventory.line')
     >>> Location = Model.get('stock.location')
-    >>> storage = supplier_warehouse.storage_location
+    >>> storage = warehouse.storage_location
     >>> inventory = Inventory()
     >>> inventory.location = storage
     >>> inventory_line1 = InventoryLine()
@@ -187,9 +233,30 @@ Create an Inventory::
     >>> inventory.state
     u'done'
 
+Create a Supplier Inventory::
+
+    >>> storage = supplier_warehouse.storage_location
+    >>> inventory = Inventory()
+    >>> inventory.location = storage
+    >>> inventory_line1 = InventoryLine()
+    >>> inventory.lines.append(inventory_line1)
+    >>> inventory_line1.product = component1
+    >>> inventory_line1.quantity = 20
+    >>> inventory_line2 = InventoryLine()
+    >>> inventory.lines.append(inventory_line2)
+    >>> inventory_line2.product = component2
+    >>> inventory_line2.quantity = 6
+    >>> inventory_line3 = InventoryLine()
+    >>> inventory.lines.append(inventory_line3)
+    >>> inventory_line3.product = product
+    >>> inventory_line3.quantity = 2
+    >>> inventory.save()
+    >>> Inventory.confirm([inventory.id], config.context)
+    >>> inventory.state
+    u'done'
+
 Make a production::
 
-    >>> warehouse = Location.find(['code', '=', 'WH'])
     >>> Production = Model.get('production')
     >>> production = Production()
     >>> production.warehouse = warehouse
@@ -225,43 +292,74 @@ Make a production::
     u'done'
     >>> output.effective_date == production.effective_date
     True
-    >>> config._context['locations'] = [storage.id]
+    >>> config._context['locations'] = [warehouse.id]
     >>> product.reload()
     >>> product.quantity == 2
     True
 
-Make a production with effective date yesterday::
+Make a subcontract production::
 
-    >>> Production = Model.get('production')
+    >>> Purchase = Model.get('purchase.purchase')
+    >>> Internal = Model.get('stock.shipment.internal')
     >>> production = Production()
-    >>> production.effective_date = yesterday
+    >>> production.warehouse = warehouse
     >>> production.product = product
     >>> production.bom = bom
     >>> production.quantity = 2
-    >>> production.subcontract_product == subcontract
-    >>> production.click('wait')
-    >>> production.click('create_purchase_request')
-
-Process purchase request::
-
+    >>> sorted([i.quantity for i in production.inputs]) == [10, 300]
+    True
+    >>> output, = production.outputs
+    >>> output.quantity == 2
+    True
+    >>> production.cost
+    Decimal('25.0')
+    >>> production.subcontract_product = subcontract
+    >>> production.save()
+    >>> Production.wait([production.id], config.context)
+    >>> production.reload()
+    >>> production.state
+    u'waiting'
+    >>> Production.create_purchase_request([production.id], config.context)
+    >>> production.reload()
     >>> purchase_request = production.purchase_request
     >>> create_purchase = Wizard('purchase.request.create_purchase',
     ...     [purchase_request])
+    >>> create_purchase.form.party = party
+    >>> create_purchase.execute('start')
     >>> purchase_request.reload()
     >>> purchase = purchase_request.purchase
-    >>> purchase.click('quotation')
-    >>> purchase.click('confirm')
-    >>> purchase.click('process')
+    >>> purchase.payment_term = payment_term
+    >>> purchase.invoice_method = 'manual'
+    >>> purchase.save()
+    >>> Purchase.quote([purchase.id], config.context)
+    >>> purchase.reload()
+    >>> purchase.state
+    u'quotation'
+    >>> Purchase.confirm([purchase.id], config.context)
+    >>> purchase.reload()
+    >>> purchase.state
+    u'confirmed'
+    >>> Purchase.process([purchase.id], config.context)
+    >>> purchase.reload()
+    >>> purchase.state
+    u'done'
     >>> production.reload()
-    >>> production.warehouse = supplier_warehouse
-    >>> production.destination_warehouse = warehouse
-    >>> shipment = production.incoming_shipment
-
-Process production::
-
+    >>> production.incoming_shipment.id
+    1
+    >>> internal = production.incoming_shipment
+    >>> Internal.wait([internal.id], config.context)
+    >>> internal.reload()
+    >>> internal.state
+    u'waiting'
+    >>> Internal.assign_try([internal.id], config.context)
+    True
+    >>> Internal.done([internal.id], config.context)
+    >>> internal.reload()
+    >>> internal.state
+    u'done'
     >>> Production.assign_try([production.id], config.context)
     True
-    >>> production.click('run')
+    >>> Production.run([production.id], config.context)
     >>> production.reload()
-    >>> shipment.reload()
-    >>> shipment.state = 'reserved'
+    >>> production.state
+    u'running'
