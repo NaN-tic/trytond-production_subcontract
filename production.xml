@@ -1,33 +1,28 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0"?>
 <tryton>
     <data>
         <record model="ir.ui.view" id="party_view_form">
             <field name="model">party.party</field>
-            <field name="type">form</field>
             <field name="inherit" ref="party.party_view_form"/>
             <field name="name">party_form</field>
         </record>
         <record model="ir.ui.view" id="production_view_form">
             <field name="model">production</field>
-            <field name="type">form</field>
             <field name="inherit" ref="production.production_view_form"/>
             <field name="name">production_form</field>
         </record>
         <record model="ir.ui.view" id="production_view_list">
             <field name="model">production</field>
-            <field name="type">tree</field>
             <field name="inherit" ref="production.production_view_list"/>
             <field name="name">production_list</field>
         </record>
         <record model="ir.ui.view" id="bom_view_form">
             <field name="model">production.bom</field>
-            <field name="type">form</field>
             <field name="inherit" ref="production.bom_view_form"/>
             <field name="name">bom_form</field>
         </record>
         <record model="ir.ui.view" id="bom_view_list">
             <field name="model">production.bom</field>
-            <field name="type">tree</field>
             <field name="inherit" ref="production.bom_view_list"/>
             <field name="name">bom_list</field>
         </record>

@@ -12,6 +12,12 @@ Imports::
     >>> from dateutil.relativedelta import relativedelta
     >>> from decimal import Decimal
     >>> from proteus import config, Model, Wizard
+    >>> from trytond.modules.company.tests.tools import create_company, \
+    ...     get_company
+    >>> from trytond.modules.account.tests.tools import create_fiscalyear, \
+    ...     create_chart, get_accounts, create_tax
+    >>> from trytond.modules.account_invoice.tests.tools import \
+    ...     set_fiscalyear_invoice_sequences
     >>> today = datetime.date.today()
     >>> yesterday = today - relativedelta(days=1)
 
@@ -22,41 +28,50 @@ Create database::
 
 Install production Module::
 
-    >>> Module = Model.get('ir.module.module')
+    >>> Module = Model.get('ir.module')
     >>> modules = Module.find([('name', '=', 'production_subcontract')])
     >>> Module.install([x.id for x in modules], config.context)
-    >>> Wizard('ir.module.module.install_upgrade').execute('upgrade')
+    >>> Wizard('ir.module.install_upgrade').execute('upgrade')
 
 Create company::
 
-    >>> Currency = Model.get('currency.currency')
-    >>> CurrencyRate = Model.get('currency.currency.rate')
-    >>> Company = Model.get('company.company')
-    >>> Party = Model.get('party.party')
-    >>> company_config = Wizard('company.company.config')
-    >>> company_config.execute('company')
-    >>> company = company_config.form
-    >>> party = Party(name='Dunder Mifflin')
-    >>> party.save()
-    >>> company.party = party
-    >>> currencies = Currency.find([('code', '=', 'USD')])
-    >>> if not currencies:
-    ...     currency = Currency(name='Euro', symbol=u'$', code='USD',
-    ...         rounding=Decimal('0.01'), mon_grouping='[3, 3, 0]',
-    ...         mon_decimal_point=',')
-    ...     currency.save()
-    ...     CurrencyRate(date=today + relativedelta(month=1, day=1),
-    ...         rate=Decimal('1.0'), currency=currency).save()
-    ... else:
-    ...     currency, = currencies
-    >>> company.currency = currency
-    >>> company_config.execute('add')
-    >>> company, = Company.find()
+    >>> _ = create_company()
+    >>> company = get_company()
 
 Reload the context::
 
     >>> User = Model.get('res.user')
     >>> config._context = User.get_preferences(True, config.context)
+
+Create fiscal year::
+
+    >>> fiscalyear = set_fiscalyear_invoice_sequences(
+    ...     create_fiscalyear(company))
+    >>> fiscalyear.click('create_period')
+
+Create chart of accounts::
+
+    >>> _ = create_chart(company)
+    >>> accounts = get_accounts(company)
+    >>> revenue = accounts['revenue']
+    >>> expense = accounts['expense']
+    >>> cash = accounts['cash']
+
+    >>> Journal = Model.get('account.journal')
+    >>> cash_journal, = Journal.find([('type', '=', 'cash')])
+    >>> cash_journal.credit_account = cash
+    >>> cash_journal.debit_account = cash
+    >>> cash_journal.save()
+
+Create payment term::
+
+    >>> PaymentTerm = Model.get('account.invoice.payment_term')
+    >>> payment_term = PaymentTerm(name='Term')
+    >>> line = payment_term.lines.new(type='percent', ratio=Decimal('.5'))
+    >>> delta = line.relativedeltas.new(days=20)
+    >>> line = payment_term.lines.new(type='remainder')
+    >>> delta = line.relativedeltas.new(days=40)
+    >>> payment_term.save()
 
 Create supplier warehouse::
 
@@ -68,10 +83,10 @@ Create supplier warehouse::
     >>> supplier_output = Location(name='Supplier Output', type='storage')
     >>> supplier_output.save()
     >>> supplier_production = Location(name='Supplier Production',
-    ...     type='storage')
+    ...     type='production')
     >>> supplier_production.save()
     >>> supplier_warehouse = Location()
-    >>> supplier_warehouse.type = 'warhouse'
+    >>> supplier_warehouse.type = 'warehouse'
     >>> supplier_warehouse.name = 'Supplier Warehouse'
     >>> supplier_warehouse.storage_location = supplier_storage
     >>> supplier_warehouse.input_location = supplier_input
@@ -84,6 +99,7 @@ Create supplier::
     >>> Party = Model.get('party.party')
     >>> party = Party(name='Supplier')
     >>> party.production_warehouse = supplier_warehouse
+    >>> party.save()
 
 Create product::
 
@@ -135,6 +151,9 @@ Create Subcontract Product::
     >>> stemplate.name = 'Subcontract'
     >>> stemplate.default_uom = unit
     >>> stemplate.type = 'service'
+    >>> stemplate.purchasable = True
+    >>> stemplate.account_expense = expense
+    >>> stemplate.account_revenue = revenue
     >>> stemplate.list_price = Decimal(0)
     >>> stemplate.cost_price = Decimal(100)
     >>> stemplate.save()
@@ -168,10 +187,11 @@ Create Bill of Material::
 
 Create an Inventory::
 
+    >>> warehouse, = Location.find(['code', '=', 'WH'])
     >>> Inventory = Model.get('stock.inventory')
     >>> InventoryLine = Model.get('stock.inventory.line')
     >>> Location = Model.get('stock.location')
-    >>> storage = supplier_warehouse.storage_location
+    >>> storage = warehouse.storage_location
     >>> inventory = Inventory()
     >>> inventory.location = storage
     >>> inventory_line1 = InventoryLine()
@@ -187,9 +207,30 @@ Create an Inventory::
     >>> inventory.state
     u'done'
 
+Create a Supplier Inventory::
+
+    >>> storage = supplier_warehouse.storage_location
+    >>> inventory = Inventory()
+    >>> inventory.location = storage
+    >>> inventory_line1 = InventoryLine()
+    >>> inventory.lines.append(inventory_line1)
+    >>> inventory_line1.product = component1
+    >>> inventory_line1.quantity = 20
+    >>> inventory_line2 = InventoryLine()
+    >>> inventory.lines.append(inventory_line2)
+    >>> inventory_line2.product = component2
+    >>> inventory_line2.quantity = 6
+    >>> inventory_line3 = InventoryLine()
+    >>> inventory.lines.append(inventory_line3)
+    >>> inventory_line3.product = product
+    >>> inventory_line3.quantity = 2
+    >>> inventory.save()
+    >>> Inventory.confirm([inventory.id], config.context)
+    >>> inventory.state
+    u'done'
+
 Make a production::
 
-    >>> warehouse = Location.find(['code', '=', 'WH'])
     >>> Production = Model.get('production')
     >>> production = Production()
     >>> production.warehouse = warehouse
@@ -202,7 +243,7 @@ Make a production::
     >>> output.quantity == 2
     True
     >>> production.cost
-    Decimal('25.0')
+    Decimal('25.0000')
     >>> production.save()
     >>> Production.wait([production.id], config.context)
     >>> production.state
@@ -225,43 +266,73 @@ Make a production::
     u'done'
     >>> output.effective_date == production.effective_date
     True
-    >>> config._context['locations'] = [storage.id]
+    >>> config._context['locations'] = [warehouse.id]
     >>> product.reload()
     >>> product.quantity == 2
     True
 
-Make a production with effective date yesterday::
+Make a subcontract production::
 
-    >>> Production = Model.get('production')
+    >>> Purchase = Model.get('purchase.purchase')
+    >>> Internal = Model.get('stock.shipment.internal')
     >>> production = Production()
-    >>> production.effective_date = yesterday
+    >>> production.warehouse = warehouse
     >>> production.product = product
     >>> production.bom = bom
     >>> production.quantity = 2
-    >>> production.subcontract_product == subcontract
-    >>> production.click('wait')
-    >>> production.click('create_purchase_request')
-
-Process purchase request::
-
+    >>> sorted([i.quantity for i in production.inputs]) == [10, 300]
+    True
+    >>> output, = production.outputs
+    >>> output.quantity == 2
+    True
+    >>> production.cost
+    Decimal('25.0000')
+    >>> production.subcontract_product = subcontract
+    >>> production.save()
+    >>> Production.wait([production.id], config.context)
+    >>> production.reload()
+    >>> production.state
+    u'waiting'
+    >>> Production.create_purchase_request([production.id], config.context)
+    >>> production.reload()
     >>> purchase_request = production.purchase_request
     >>> create_purchase = Wizard('purchase.request.create_purchase',
     ...     [purchase_request])
+    >>> create_purchase.form.party = party
+    >>> create_purchase.execute('start')
     >>> purchase_request.reload()
     >>> purchase = purchase_request.purchase
-    >>> purchase.click('quotation')
-    >>> purchase.click('confirm')
-    >>> purchase.click('process')
+    >>> purchase.payment_term = payment_term
+    >>> purchase.save()
+    >>> Purchase.quote([purchase.id], config.context)
+    >>> purchase.reload()
+    >>> purchase.state
+    u'quotation'
+    >>> Purchase.confirm([purchase.id], config.context)
+    >>> purchase.reload()
+    >>> purchase.state
+    u'confirmed'
+    >>> Purchase.process([purchase.id], config.context)
+    >>> purchase.reload()
+    >>> purchase.state
+    u'done'
     >>> production.reload()
-    >>> production.warehouse = supplier_warehouse
-    >>> production.destination_warehouse = warehouse
-    >>> shipment = production.incoming_shipment
-
-Process production::
-
+    >>> production.incoming_shipment.id
+    1
+    >>> internal = production.incoming_shipment
+    >>> Internal.wait([internal.id], config.context)
+    >>> internal.reload()
+    >>> internal.state
+    u'waiting'
+    >>> Internal.assign_try([internal.id], config.context)
+    True
+    >>> Internal.done([internal.id], config.context)
+    >>> internal.reload()
+    >>> internal.state
+    u'done'
     >>> Production.assign_try([production.id], config.context)
     True
-    >>> production.click('run')
+    >>> Production.run([production.id], config.context)
     >>> production.reload()
-    >>> shipment.reload()
-    >>> shipment.state = 'reserved'
+    >>> production.state
+    u'running'
