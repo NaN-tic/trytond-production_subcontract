@@ -315,7 +315,7 @@ Make a subcontract production::
     >>> Purchase.process([purchase.id], config.context)
     >>> purchase.reload()
     >>> purchase.state
-    u'done'
+    u'processing'
     >>> production.reload()
     >>> production.incoming_shipment.id
     1

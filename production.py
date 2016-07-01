@@ -173,7 +173,7 @@ class Production:
             for output in production.outputs:
                 move = production._get_incoming_shipment_move(output,
                     from_location, to_location)
-                shipment.moves.append(move)
+                shipment.moves += (move,)
             shipment.save()
             ShipmentInternal.wait([shipment])
             production.incoming_shipment = shipment
