@@ -1,7 +1,7 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
 from trytond.pool import Pool, PoolMeta
-from trytond.model import ModelView, fields
+from trytond.model import Workflow, ModelView, fields
 from trytond.pyson import Eval, Bool
 
 __all__ = ['Party', 'PurchaseRequest', 'BOM', 'Production', 'Purchase']
@@ -67,8 +67,6 @@ class Production:
     @classmethod
     def __setup__(cls):
         super(Production, cls).__setup__()
-        # TODO: Do not allow starting a production if purchase_request has been
-        # created but purchase order is not in processing state.
         cls._buttons.update({
                 'create_purchase_request': {
                     'invisible': ~(Eval('state').in_(['draft', 'waiting']) &
@@ -78,14 +76,13 @@ class Production:
                     }
                 })
         cls._error_messages.update({
-                'no_subcontract_warehouse': 'The party "%s" has no production '
-                    'location.',
-                'no_warehouse_production_location': 'The warehouse "%s" has '
-                    'no production location.',
-                'no_incoming_shipment': 'The production "%s" has no incoming '
-                    'shipment.',
-                'no_incoming_shipment_done': ('The production "%s" has no the '
-                    'incoming shipment "%s" as done.'),
+                'no_subcontract_warehouse': ('The party "%s" has no production '
+                    'location.'),
+                'no_warehouse_production_location': ('The warehouse "%s" has '
+                    'no production location.'),
+                'no_incoming_shipment': ('The production "%s" has no incoming '
+                    'shipment. You must process the purchase before the '
+                    'production can be assigned.'),
                 })
 
     def get_supplier(self, name):
@@ -234,19 +231,19 @@ class Production:
         pass
 
     @classmethod
-    def run(cls, productions):
+    @ModelView.button
+    #@Workflow.transition('assigned')
+    def assign_try(cls, productions):
         for p in productions:
             if p.purchase_request:
                 if not p.incoming_shipment:
                     cls.raise_user_error('no_incoming_shipment', (
                         p.code,))
-                if not p.incoming_shipment.state == 'done':
-                    cls.raise_user_error('no_incoming_shipment_done', (
-                        p.code, p.incoming_shipment.rec_name,))
-
-        super(Production, cls).run(productions)
+        return super(Production, cls).assign_try(productions)
 
     @classmethod
+    @ModelView.button
+    @Workflow.transition('done')
     def done(cls, productions):
         InternalShipment = Pool().get('stock.shipment.internal')
         super(Production, cls).done(productions)
