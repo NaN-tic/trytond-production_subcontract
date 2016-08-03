@@ -1,16 +1,10 @@
-#
+# 
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
 msgctxt "error:production:"
-msgid "The production \"%s\" has no incoming shipment."
-msgstr "La producción \"%s\" no tiene el albarán de entrada."
-
-msgctxt "error:production:"
-msgid "The production \"%s\" has no the incoming shipment \"%s\" as done."
+msgid "The party \"%s\" has no production location."
 msgstr ""
-"La producción \"%s\" no tiene el albarán de entrada \"%s\" en estado "
-"realizado."
 
 msgctxt "error:production:"
 msgid "The warehouse \"%s\" has no production location."
