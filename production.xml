@@ -31,5 +31,41 @@
             <field name="inherit" ref="production.bom_view_list"/>
             <field name="name">bom_list</field>
         </record>
+
+        <!-- Create Internal Shipments wizard-->
+        <record model="ir.ui.view" id="create_internal_start_view_form">
+            <field name="model">production.subcontract.internal.start</field>
+            <field name="type">form</field>
+            <field name="name">create_internal_start_form</field>
+        </record>
+
+        <record model="ir.action.wizard" id="wizard_production_subcontract_internal">
+            <field name="name">Create Internal Shipments</field>
+            <field name="wiz_name">production.subcontract.internal</field>
+            <field name="model">production</field>
+        </record>
+        <record model="ir.action.keyword" id="production_subcontract_internal_keyword">
+            <field name="keyword">form_action</field>
+            <field name="model">production,-1</field>
+            <field name="action" ref="wizard_production_subcontract_internal"/>
+        </record>
+        <record model="ir.action-res.group"
+            id="action_group_wizard_production_subcontract_internal">
+            <field name="action" ref="wizard_production_subcontract_internal"/>
+            <field name="group" ref="production.group_production"/>
+        </record>
+
+        <!-- Action keyword production to shipemnt internal -->
+        <record model="ir.action.wizard" id="act_shipment_internal_form">
+            <field name="name">Shipments Internal</field>
+            <field name="wiz_name">production.subcontract.open_internal</field>
+            <field name="model">production</field>
+        </record>
+        <record model="ir.action.keyword"
+                id="act_open_shipment_internal_keyword1">
+            <field name="keyword">form_relate</field>
+            <field name="model">production,-1</field>
+            <field name="action" ref="act_shipment_internal_form"/>
+        </record>
     </data>
 </tryton>

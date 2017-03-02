@@ -2,9 +2,13 @@
 # copyright notices and license terms.
 from trytond.pool import Pool, PoolMeta
 from trytond.model import Workflow, ModelView, fields
-from trytond.pyson import Eval, Bool
+from trytond.wizard import Wizard, Button, StateAction, StateView
+from trytond.pyson import Eval, Bool, PYSONEncoder
+from trytond.transaction import Transaction
 
-__all__ = ['Party', 'PurchaseRequest', 'BOM', 'Production', 'Purchase']
+__all__ = ['Party', 'PurchaseRequest', 'BOM', 'Production',
+    'ProductionSubcontractInternalStart', 'ProductionSubcontractInternal',
+    'OpenShipmentInternal', 'Purchase']
 
 
 class Party:
@@ -63,6 +67,10 @@ class Production:
             ], readonly=True)
     supplier = fields.Function(fields.Many2One('party.party', 'Supplier'),
         'get_supplier', searcher='search_supplier')
+    internal_moves = fields.Function(fields.One2Many('stock.move', None,
+        'Internal Moves'), 'get_internal_moves')
+    internal_shipments = fields.Function(fields.One2Many('stock.shipment.internal',
+        None, 'Internal Shipments'), 'get_internal_shipments')
 
     @classmethod
     def __setup__(cls):
@@ -73,7 +81,13 @@ class Production:
                         Bool(Eval('subcontract_product')) &
                         ~Bool(Eval('purchase_request'))),
                     'icon': 'tryton-go-home',
-                    }
+                    },
+                'create_internal_shipment': {
+                    'invisible': Eval('state').in_(['cancel', 'done']) |
+                        ~(Bool(Eval('subcontract_product')) &
+                        Bool(Eval('destination_warehouse'))),
+                    'icon': 'tryton-go-home',
+                    },
                 })
         cls._error_messages.update({
                 'no_subcontract_warehouse': ('The party "%s" has no production '
@@ -83,6 +97,9 @@ class Production:
                 'no_incoming_shipment': ('The production "%s" has no incoming '
                     'shipment. You must process the purchase before the '
                     'production can be assigned.'),
+                'internal_shipment_already_exists': (
+                    'A Shipment Internal already exists for the production '
+                    '\"%(production)s\".'),
                 })
 
     def get_supplier(self, name):
@@ -99,6 +116,7 @@ class Production:
             default = {}
         default['purchase_request'] = None
         default['incoming_shipment'] = None
+        default['destination_warehouse'] = None
         return super(Production, cls).copy(productions, default)
 
     @classmethod
@@ -114,6 +132,24 @@ class Production:
             production.purchase_request = request
             production.save()
 
+    @classmethod
+    @ModelView.button
+    def create_internal_shipment(cls, productions):
+        ShipmentInternal = Pool().get('stock.shipment.internal')
+
+        to_create = []
+        for production in productions:
+            if not production.destination_warehouse:
+                continue
+            if production.state in ('cancel', 'done'):
+                continue
+            internal = production._get_internal_shipment()
+            to_create.append(internal._save_values)
+
+        if to_create:
+            ShipmentInternal.create(to_create)
+
+
     def on_change_product(self):
         res = super(Production, self).on_change_product()
         if self.bom:
@@ -128,6 +164,17 @@ class Production:
                 self.bom.subcontract_product else None)
         return res
 
+    def get_internal_moves(self, name):
+        Move = Pool().get('stock.move')
+        return [m.id for m in Move.search([('origin', 'in', [
+            'stock.move,%s' % i.id for i in self.inputs])])]
+
+    def get_internal_shipments(self, name):
+        shipments = set()
+        for move in self.internal_moves:
+            shipments.add(move.shipment)
+        return [s.id for s in shipments]
+
     def _get_purchase_request(self):
         PurchaseRequest = Pool().get('purchase.request')
         return PurchaseRequest(
@@ -140,10 +187,34 @@ class Production:
             origin=self,
             )
 
+    def _get_internal_shipment(self):
+        ShipmentInternal = Pool().get('stock.shipment.internal')
+
+        if self.internal_moves:
+            self.raise_user_warning(
+                'production_internal_shipment_%d' % self.id,
+                'internal_shipment_already_exists', {
+                    'production': self.rec_name,
+                    })
+
+        from_location = self.destination_warehouse.storage_location
+        to_location = self.warehouse.storage_location
+
+        shipment = ShipmentInternal()
+        shipment.reference = self.code
+        shipment.from_location = from_location
+        shipment.to_location = to_location
+        shipment.moves = []
+        for input in self.inputs:
+            move = self._get_shipment_move(input,
+                from_location, to_location)
+            shipment.moves.append(move)
+        return shipment
+
     @classmethod
     def process_purchase_request(cls, productions):
-        pool = Pool()
-        ShipmentInternal = pool.get('stock.shipment.internal')
+        ShipmentInternal = Pool().get('stock.shipment.internal')
+
         for production in productions:
             if not (production.purchase_request and
                     production.purchase_request.purchase and
@@ -170,7 +241,7 @@ class Production:
             shipment.to_location = to_location
             shipment.moves = []
             for output in production.outputs:
-                move = production._get_incoming_shipment_move(output,
+                move = production._get_shipment_move(output,
                     from_location, to_location)
                 shipment.moves.append(move)
             shipment.save()
@@ -189,15 +260,16 @@ class Production:
                 move.save()
             production.save()
 
-    def _get_incoming_shipment_move(self, output, from_location, to_location):
+    def _get_shipment_move(self, move, from_location, to_location):
         Move = Pool().get('stock.move')
         return Move(
             from_location=from_location,
             to_location=to_location,
-            product=output.product,
+            product=move.product,
             # TODO: Support lots
-            quantity=output.quantity,
-            uom=output.uom,
+            quantity=move.quantity,
+            uom=move.uom,
+            origin=move,
             )
 
     def _get_subcontract_warehouse(self):
@@ -253,6 +325,64 @@ class Production:
             InternalShipment.assign_try(shipments)
 
 # TODO: Internal shipment should be updated each time outputs are changed
+
+
+class ProductionSubcontractInternalStart(ModelView):
+    'Production Subcontract Internal Start'
+    __name__ = 'production.subcontract.internal.start'
+
+
+class ProductionSubcontractInternal(Wizard):
+    'Production Subcontract Internal'
+    __name__ = 'production.subcontract.internal'
+    start = StateView('production.subcontract.internal.start',
+        'production_subcontract.create_internal_start_view_form', [
+            Button('Cancel', 'end', 'tryton-cancel'),
+            Button('Create', 'create_internal', 'tryton-ok', default=True),
+            ])
+    create_internal = StateAction('stock.act_shipment_internal_form')
+
+    def do_create_internal(self, action):
+        pool = Pool()
+        Production = pool.get('production')
+        ShipmentInternal = pool.get('stock.shipment.internal')
+
+        to_create = []
+        for production in Production.browse(Transaction().context['active_ids']):
+            if not production.destination_warehouse:
+                continue
+            if production.state in ('cancel', 'done'):
+                continue
+            internal = production._get_internal_shipment()
+            to_create.append(internal._save_values)
+
+        if to_create:
+            internals = ShipmentInternal.create(to_create)
+            data = {'res_id': [i.id for i in internals]}
+            if len(internals) == 1:
+                action['views'].reverse()
+            return action, data
+
+
+class OpenShipmentInternal(Wizard):
+    'Open Shipment Internal'
+    __name__ = 'production.subcontract.open_internal'
+    start_state = 'open_'
+    open_ = StateAction('stock.act_shipment_internal_form')
+
+    def do_open_(self, action):
+        Production = Pool().get('production')
+
+        shipments = set()
+        for production in Production.browse(Transaction().context['active_ids']):
+            for shipment in production.internal_shipments:
+                shipments.add(shipment.id)
+
+        encoder = PYSONEncoder()
+        action['pyson_domain'] = encoder.encode([('id', 'in', list(shipments))])
+        action['pyson_search_value'] = encoder.encode([])
+        return action, {}
+
 
 class Purchase:
     __name__ = 'purchase.purchase'

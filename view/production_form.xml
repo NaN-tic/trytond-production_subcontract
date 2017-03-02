@@ -6,7 +6,9 @@
         <label name="subcontract_product"/>
         <field name="subcontract_product"/>
         <button name="create_purchase_request" string="Create Purchase Request"
-         colspan="2"/>
+            icon="tryton-executable"/>
+        <button name="create_internal_shipment" string="Create Internal Shipment"
+            icon="tryton-executable"/>
     </xpath>
     <xpath expr="/form/notebook/page[@id='other']/field[@name='location']"
         position="after">
