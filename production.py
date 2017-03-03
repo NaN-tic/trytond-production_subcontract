@@ -84,8 +84,7 @@ class Production:
                     },
                 'create_internal_shipment': {
                     'invisible': Eval('state').in_(['cancel', 'done']) |
-                        ~(Bool(Eval('subcontract_product')) &
-                        Bool(Eval('destination_warehouse'))),
+                        ~(Bool(Eval('destination_warehouse'))),
                     'icon': 'tryton-go-home',
                     },
                 })
