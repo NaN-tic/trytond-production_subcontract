@@ -134,20 +134,29 @@ class Production:
     @classmethod
     @ModelView.button
     def create_internal_shipment(cls, productions):
-        ShipmentInternal = Pool().get('stock.shipment.internal')
+        cls.create_internal_shipments(productions)
 
-        to_create = []
-        for production in productions:
-            if not production.destination_warehouse:
-                continue
-            if production.state in ('cancel', 'done'):
-                continue
-            internal = production._get_internal_shipment()
-            to_create.append(internal._save_values)
+    @classmethod
+    @ModelView.button
+    #@Workflow.transition('assigned')
+    def assign_try(cls, productions):
+        for p in productions:
+            if p.purchase_request:
+                if not p.incoming_shipment:
+                    cls.raise_user_error('no_incoming_shipment', (
+                        p.code,))
+        return super(Production, cls).assign_try(productions)
 
-        if to_create:
-            ShipmentInternal.create(to_create)
-
+    @classmethod
+    @ModelView.button
+    @Workflow.transition('done')
+    def done(cls, productions):
+        InternalShipment = Pool().get('stock.shipment.internal')
+        super(Production, cls).done(productions)
+        shipments = [x.incoming_shipment for x in productions if
+            x.incoming_shipment]
+        if shipments:
+            InternalShipment.assign_try(shipments)
 
     def on_change_product(self):
         res = super(Production, self).on_change_product()
@@ -186,28 +195,15 @@ class Production:
             origin=self,
             )
 
-    def _get_internal_shipment(self):
+    @classmethod
+    def _get_internal_shipment(cls, from_location, to_location, reference=None):
         ShipmentInternal = Pool().get('stock.shipment.internal')
 
-        if self.internal_moves:
-            self.raise_user_warning(
-                'production_internal_shipment_%d' % self.id,
-                'internal_shipment_already_exists', {
-                    'production': self.rec_name,
-                    })
-
-        from_location = self.destination_warehouse.storage_location
-        to_location = self.warehouse.storage_location
-
         shipment = ShipmentInternal()
-        shipment.reference = self.code
+        shipment.reference = reference
         shipment.from_location = from_location
         shipment.to_location = to_location
         shipment.moves = []
-        for input in self.inputs:
-            move = self._get_shipment_move(input,
-                from_location, to_location)
-            shipment.moves.append(move)
         return shipment
 
     @classmethod
@@ -302,26 +298,84 @@ class Production:
         pass
 
     @classmethod
-    @ModelView.button
-    #@Workflow.transition('assigned')
-    def assign_try(cls, productions):
-        for p in productions:
-            if p.purchase_request:
-                if not p.incoming_shipment:
-                    cls.raise_user_error('no_incoming_shipment', (
-                        p.code,))
-        return super(Production, cls).assign_try(productions)
+    def create_internal_shipments(cls, productions):
+        '''Create internal shipmets group by destination warehouse'''
+        pool = Pool()
+        ShipmentInternal = pool.get('stock.shipment.internal')
+        Product = pool.get('product.product')
+        Date = pool.get('ir.date')
 
-    @classmethod
-    @ModelView.button
-    @Workflow.transition('done')
-    def done(cls, productions):
-        InternalShipment = Pool().get('stock.shipment.internal')
-        super(Production, cls).done(productions)
-        shipments = [x.incoming_shipment for x in productions if
-            x.incoming_shipment]
-        if shipments:
-            InternalShipment.assign_try(shipments)
+        today = Date.today()
+
+        internal_grouping = {}
+        for production in productions:
+            if not production.destination_warehouse:
+                continue
+            if production.state in ('cancel', 'done'):
+                continue
+            if production.internal_moves:
+                cls.raise_user_warning(
+                    'production_internal_shipment_%d' % production.id,
+                    'internal_shipment_already_exists', {
+                        'production': production.rec_name,
+                        })
+
+            key = (production.destination_warehouse.storage_location,
+                production.warehouse.storage_location,)
+            if key in internal_grouping:
+                internal_grouping[key].append(production)
+            else:
+                internal_grouping[key] = [production]
+
+        to_create = []
+        for k, productions in internal_grouping.iteritems():
+            from_location = k[0]
+            to_location = k[1]
+
+            reference = ', '.join([p.code for p in productions])
+            planned_start_dates = [p.planned_start_date for p in productions \
+                if p.planned_start_date]
+
+            # get product qty in to location
+            product_ids = set()
+            for production in productions:
+                for input in production.inputs:
+                    product_ids.add(input.product.id)
+
+            with Transaction().set_context(forecast=True,
+                    stock_date_end=today):
+                pbl = Product.products_by_location([to_location.id],
+                    list(product_ids))
+
+            shipment = cls._get_internal_shipment(
+                from_location,
+                to_location,
+                reference)
+            if planned_start_dates:
+                shipment.planned_start_date = min(planned_start_dates)
+            for production in productions:
+                for input in production.inputs:
+                    qty_move = input.quantity
+                    key = (to_location.id, input.product.id)
+                    # in case that exist stock in to warehouse, substract qty moves
+                    if key in pbl:
+                        qty = pbl[key]
+                        if qty >= qty_move:
+                            pbl[key] = qty - qty_move
+                            continue
+                        elif qty > 0:
+                            qty_move = qty_move - qty
+                            pbl[key] = 0
+                    if qty_move == 0:
+                        continue
+                    move = production._get_shipment_move(input,
+                        from_location, to_location)
+                    move.quantity = qty_move
+                    shipment.moves.append(move)
+            to_create.append(shipment._save_values)
+
+        if to_create:
+            return ShipmentInternal.create(to_create)
 
 # TODO: Internal shipment should be updated each time outputs are changed
 
@@ -342,23 +396,14 @@ class ProductionSubcontractInternal(Wizard):
     create_internal = StateAction('stock.act_shipment_internal_form')
 
     def do_create_internal(self, action):
-        pool = Pool()
-        Production = pool.get('production')
-        ShipmentInternal = pool.get('stock.shipment.internal')
+        Production = Pool().get('production')
 
-        to_create = []
-        for production in Production.browse(Transaction().context['active_ids']):
-            if not production.destination_warehouse:
-                continue
-            if production.state in ('cancel', 'done'):
-                continue
-            internal = production._get_internal_shipment()
-            to_create.append(internal._save_values)
+        productions = Production.browse(Transaction().context['active_ids'])
+        shipments = Production.create_internal_shipments(productions)
 
-        if to_create:
-            internals = ShipmentInternal.create(to_create)
-            data = {'res_id': [i.id for i in internals]}
-            if len(internals) == 1:
+        if shipments:
+            data = {'res_id': [s.id for s in shipments]}
+            if len(shipments) == 1:
                 action['views'].reverse()
             return action, data
 
