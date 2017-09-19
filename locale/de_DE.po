@@ -1,0 +1,51 @@
+#
+msgid ""
+msgstr "Content-Type: text/plain; charset=utf-8\n"
+
+msgctxt "error:production:"
+msgid "The party \"%s\" has no production location."
+msgstr "Für Partei \"%s\" ist kein Produktionsort eingetragen."
+
+msgctxt "error:production:"
+msgid ""
+"The production \"%s\" has no incoming shipment. You must process the "
+"purchase before the production can be assigned."
+msgstr ""
+"Für Produktion \"%s\" existiert kein eingehender Lieferposten. Vor Zuweisung"
+" der Produktion muss der Einkauf durchgeführt werden."
+
+msgctxt "error:production:"
+msgid "The warehouse \"%s\" has no production location."
+msgstr "Für Warenlager \"%s\" ist kein Produktionslagerort eingetragen."
+
+msgctxt "field:party.party,production_warehouse:"
+msgid "Production Warehouse"
+msgstr "Produktionslager"
+
+msgctxt "field:production,destination_warehouse:"
+msgid "Destination Warehouse"
+msgstr "Bestimmungslager"
+
+msgctxt "field:production,incoming_shipment:"
+msgid "Incoming Shipment"
+msgstr "Eingehender Lieferposten"
+
+msgctxt "field:production,purchase_request:"
+msgid "Purchase Request"
+msgstr "Bestellvorschlag"
+
+msgctxt "field:production,subcontract_product:"
+msgid "Subcontract Product"
+msgstr "Untervertragsvariante"
+
+msgctxt "field:production,supplier:"
+msgid "Supplier"
+msgstr "Lieferant"
+
+msgctxt "field:production.bom,subcontract_product:"
+msgid "Subcontract Product"
+msgstr "Untervertragsvariante"
+
+msgctxt "view:production:"
+msgid "Create Purchase Request"
+msgstr "Bestellvorschlag erstellen"
