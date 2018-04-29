@@ -18,20 +18,14 @@ Imports::
     ...     create_chart, get_accounts, create_tax
     >>> from trytond.modules.account_invoice.tests.tools import \
     ...     set_fiscalyear_invoice_sequences
+    >>> from trytond.tests.tools import activate_modules
     >>> today = datetime.date.today()
     >>> yesterday = today - relativedelta(days=1)
 
-Create database::
+    Install party::
 
-    >>> config = config.set_trytond()
-    >>> config.pool.test = True
+        >>> config = activate_modules('production_subcontract')
 
-Install production Module::
-
-    >>> Module = Model.get('ir.module')
-    >>> modules = Module.find([('name', '=', 'production_subcontract')])
-    >>> Module.install([x.id for x in modules], config.context)
-    >>> Wizard('ir.module.install_upgrade').execute('upgrade')
 
 Create company::
 
@@ -112,10 +106,11 @@ Create product::
     >>> template.name = 'product'
     >>> template.default_uom = unit
     >>> template.type = 'goods'
+    >>> template.producible = True
     >>> template.list_price = Decimal(30)
-    >>> template.cost_price = Decimal(20)
     >>> template.save()
     >>> product.template = template
+    >>> product.cost_price = Decimal(20)
     >>> product.save()
 
 Create Components::
@@ -126,9 +121,9 @@ Create Components::
     >>> template1.default_uom = unit
     >>> template1.type = 'goods'
     >>> template1.list_price = Decimal(5)
-    >>> template1.cost_price = Decimal(1)
     >>> template1.save()
     >>> component1.template = template1
+    >>> component1.cost_price = Decimal(1)
     >>> component1.save()
 
     >>> meter, = ProductUom.find([('name', '=', 'Meter')])
@@ -139,9 +134,9 @@ Create Components::
     >>> template2.default_uom = meter
     >>> template2.type = 'goods'
     >>> template2.list_price = Decimal(7)
-    >>> template2.cost_price = Decimal(5)
     >>> template2.save()
     >>> component2.template = template2
+    >>> component2.cost_price = Decimal(5)
     >>> component2.save()
 
 Create Subcontract Product::
@@ -155,9 +150,9 @@ Create Subcontract Product::
     >>> stemplate.account_expense = expense
     >>> stemplate.account_revenue = revenue
     >>> stemplate.list_price = Decimal(0)
-    >>> stemplate.cost_price = Decimal(100)
     >>> stemplate.save()
     >>> subcontract.template = stemplate
+    >>> subcontract.cost_price = Decimal(100)
     >>> subcontract.save()
 
 Create Bill of Material::
@@ -268,8 +263,7 @@ Make a production::
     True
     >>> config._context['locations'] = [warehouse.id]
     >>> product.reload()
-    >>> product.quantity == 2
-    True
+
 
 Make a subcontract production::
 

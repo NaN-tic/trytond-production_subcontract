@@ -1,20 +1,67 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
 from trytond.pool import Pool, PoolMeta
-from trytond.model import Workflow, ModelView, fields
+from trytond.model import (Workflow, ModelView, fields, MultiValueMixin,
+    ValueMixin, ModelSQL)
 from trytond.pyson import Eval, Bool
+from trytond.tools.multivalue import migrate_property
+from trytond import backend
+from trytond.transaction import Transaction
 
-__all__ = ['Party', 'PurchaseRequest', 'BOM', 'Production', 'Purchase']
+
+__all__ = ['Party', 'PurchaseRequest', 'BOM', 'Production', 'Purchase',
+    'PartyProductionWarehouse']
 
 
-class Party:
+class Party(MultiValueMixin):
     __name__ = 'party.party'
     __metaclass__ = PoolMeta
-    # TODO: Should be a property
-    production_warehouse = fields.Property(fields.Many2One('stock.location',
+    production_warehouse = fields.MultiValue(fields.Many2One('stock.location',
             'Production Warehouse', domain=[
                 ('type', '=', 'warehouse'),
                 ]))
+
+
+class PartyProductionWarehouse(ModelSQL, ValueMixin):
+    "Party Lang"
+    __name__ = 'party.party.production_warehouse'
+    party = fields.Many2One(
+        'party.party', "Party", ondelete='CASCADE', select=True)
+    production_warehouse = fields.Many2One('stock.location',
+            'Production Warehouse', domain=[
+                ('type', '=', 'warehouse'),
+                ])
+
+    @classmethod
+    def __register__(cls, module_name):
+        pool = Pool()
+        Party = pool.get('party.party')
+        TableHandler = backend.get('TableHandler')
+        cursor = Transaction().connection.cursor()
+        exist = TableHandler.table_exist(cls._table)
+        table = cls.__table__()
+        party = Party.__table__()
+
+        super(PartyProductionWarehouse, cls).__register__(module_name)
+
+        if not exist:
+            party_h = TableHandler(Party, module_name)
+            if party_h.column_exist('production_warehouse'):
+                query = table.insert(
+                    [table.party, table.production_warehouse],
+                    party.select(party.id, party.production_warehouse))
+                cursor.execute(*query)
+                party_h.drop_column('production_warehouse')
+            else:
+                cls._migrate_property([], [], [])
+
+    @classmethod
+    def _migrate_property(cls, field_names, value_names, fields):
+        field_names.append('production_warehouse')
+        value_names.append('production_warehouse')
+        migrate_property(
+            'party.party', field_names, cls, value_names,
+            parent='party', fields=fields)
 
 
 class PurchaseRequest:

@@ -26,5 +26,11 @@
             <field name="inherit" ref="production.bom_view_list"/>
             <field name="name">bom_list</field>
         </record>
+
+        <record model="ir.model.button" id="create_purchase_request_button">
+            <field name="name">create_purchase_request</field>
+            <field name="model"
+                search="[('model', '=', 'production')]"/>
+        </record>
     </data>
 </tryton>
