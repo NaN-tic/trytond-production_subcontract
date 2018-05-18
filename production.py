@@ -283,7 +283,7 @@ class Production:
             if p.purchase_request:
                 if not p.incoming_shipment:
                     cls.raise_user_error('no_incoming_shipment', (
-                        p.code,))
+                        p.number,))
         return super(Production, cls).assign_try(productions)
 
     @classmethod
