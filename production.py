@@ -20,6 +20,8 @@ class Party(MultiValueMixin):
             'Production Warehouse', domain=[
                 ('type', '=', 'warehouse'),
                 ]))
+    production_warehouses = fields.One2Many('party.party.production_warehouse',
+        'party', 'Warehouses')
 
 
 class PartyProductionWarehouse(ModelSQL, ValueMixin):
