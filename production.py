@@ -13,9 +13,8 @@ __all__ = ['Party', 'PurchaseRequest', 'BOM', 'Production', 'Purchase',
     'PartyProductionWarehouse']
 
 
-class Party(MultiValueMixin):
+class Party(MultiValueMixin, metaclass=PoolMeta):
     __name__ = 'party.party'
-    __metaclass__ = PoolMeta
     production_warehouse = fields.MultiValue(fields.Many2One('stock.location',
             'Production Warehouse', domain=[
                 ('type', '=', 'warehouse'),
@@ -66,9 +65,8 @@ class PartyProductionWarehouse(ModelSQL, ValueMixin):
             parent='party', fields=fields)
 
 
-class PurchaseRequest:
+class PurchaseRequest(metaclass=PoolMeta):
     __name__ = 'purchase.request'
-    __metaclass__ = PoolMeta
 
     @classmethod
     def get_origin(cls):
@@ -82,9 +80,8 @@ class PurchaseRequest:
         return res
 
 
-class BOM:
+class BOM(metaclass=PoolMeta):
     __name__ = 'production.bom'
-    __metaclass__ = PoolMeta
     subcontract_product = fields.Many2One('product.product',
         'Subcontract Product',  domain=[
             ('purchasable', '=', True),
@@ -93,9 +90,8 @@ class BOM:
 
 # TODO: Subcontract cost must be added to the cost of the production
 
-class Production:
+class Production(metaclass=PoolMeta):
     __name__ = 'production'
-    __metaclass__ = PoolMeta
 
     subcontract_product = fields.Many2One('product.product',
         'Subcontract Product',  domain=[
@@ -301,9 +297,8 @@ class Production:
 
 # TODO: Internal shipment should be updated each time outputs are changed
 
-class Purchase:
+class Purchase(metaclass=PoolMeta):
     __name__ = 'purchase.purchase'
-    __metaclass__ = PoolMeta
 
     @classmethod
     def process(cls, purchases):

@@ -207,7 +207,7 @@ Create an Inventory::
     >>> inventory.save()
     >>> Inventory.confirm([inventory.id], config.context)
     >>> inventory.state
-    u'done'
+    'done'
 
 Create a Supplier Inventory::
 
@@ -229,7 +229,7 @@ Create a Supplier Inventory::
     >>> inventory.save()
     >>> Inventory.confirm([inventory.id], config.context)
     >>> inventory.state
-    u'done'
+    'done'
 
 Make a production::
 
@@ -249,7 +249,7 @@ Make a production::
     Decimal('25.0000')
     >>> Production.wait([production.id], config.context)
     >>> production.state
-    u'waiting'
+    'waiting'
     >>> Production.assign_try([production.id], config.context)
     True
     >>> production.reload()
@@ -265,7 +265,7 @@ Make a production::
     >>> production.reload()
     >>> output, = production.outputs
     >>> output.state
-    u'done'
+    'done'
     >>> output.effective_date == production.effective_date
     True
     >>> config._context['locations'] = [warehouse.id]
@@ -293,7 +293,7 @@ Make a subcontract production::
     >>> Production.wait([production.id], config.context)
     >>> production.reload()
     >>> production.state
-    u'waiting'
+    'waiting'
     >>> Production.create_purchase_request([production.id], config.context)
     >>> production.reload()
     >>> purchase_request = production.purchase_request
@@ -308,15 +308,11 @@ Make a subcontract production::
     >>> Purchase.quote([purchase.id], config.context)
     >>> purchase.reload()
     >>> purchase.state
-    u'quotation'
+    'quotation'
     >>> Purchase.confirm([purchase.id], config.context)
     >>> purchase.reload()
     >>> purchase.state
-    u'confirmed'
-    >>> Purchase.process([purchase.id], config.context)
-    >>> purchase.reload()
-    >>> purchase.state
-    u'processing'
+    'processing'
     >>> production.reload()
     >>> production.incoming_shipment.id
     1
@@ -324,16 +320,16 @@ Make a subcontract production::
     >>> Internal.wait([internal.id], config.context)
     >>> internal.reload()
     >>> internal.state
-    u'waiting'
+    'waiting'
     >>> Internal.assign_try([internal.id], config.context)
     True
     >>> Internal.done([internal.id], config.context)
     >>> internal.reload()
     >>> internal.state
-    u'done'
+    'done'
     >>> Production.assign_try([production.id], config.context)
     True
     >>> Production.run([production.id], config.context)
     >>> production.reload()
     >>> production.state
-    u'running'
+    'running'
