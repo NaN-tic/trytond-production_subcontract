@@ -94,6 +94,15 @@ Create supplier::
     >>> party.production_warehouse = supplier_warehouse
     >>> party.save()
 
+Create account category::
+
+    >>> ProductCategory = Model.get('product.category')
+    >>> account_category = ProductCategory(name="Account Category")
+    >>> account_category.accounting = True
+    >>> account_category.account_expense = expense
+    >>> account_category.account_revenue = revenue
+    >>> account_category.save()
+
 Create product::
 
     >>> ProductUom = Model.get('product.uom')
@@ -146,8 +155,7 @@ Create Subcontract Product::
     >>> stemplate.default_uom = unit
     >>> stemplate.type = 'service'
     >>> stemplate.purchasable = True
-    >>> stemplate.account_expense = expense
-    >>> stemplate.account_revenue = revenue
+    >>> stemplate.account_category = account_category
     >>> stemplate.list_price = Decimal(0)
     >>> stemplate.save()
     >>> subcontract.template = stemplate
