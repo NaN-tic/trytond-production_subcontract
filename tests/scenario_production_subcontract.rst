@@ -22,10 +22,9 @@ Imports::
     >>> today = datetime.date.today()
     >>> yesterday = today - relativedelta(days=1)
 
-    Install party::
+Install module::
 
-        >>> config = activate_modules('production_subcontract')
-
+    >>> config = activate_modules('production_subcontract')
 
 Create company::
 
