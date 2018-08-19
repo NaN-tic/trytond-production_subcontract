@@ -244,9 +244,9 @@ Make a production::
     >>> output, = production.outputs
     >>> output.quantity == 2
     True
+    >>> production.save()
     >>> production.cost
     Decimal('25.0000')
-    >>> production.save()
     >>> Production.wait([production.id], config.context)
     >>> production.state
     u'waiting'
@@ -286,10 +286,10 @@ Make a subcontract production::
     >>> output, = production.outputs
     >>> output.quantity == 2
     True
-    >>> production.cost
-    Decimal('25.0000')
     >>> production.subcontract_product = subcontract
     >>> production.save()
+    >>> production.cost
+    Decimal('25.0000')
     >>> Production.wait([production.id], config.context)
     >>> production.reload()
     >>> production.state
