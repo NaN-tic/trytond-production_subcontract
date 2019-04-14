@@ -7,6 +7,8 @@ from trytond.pyson import Eval, Bool
 from trytond.tools.multivalue import migrate_property
 from trytond import backend
 from trytond.transaction import Transaction
+from trytond.i18n import gettext
+from trytond.exceptions import UserError
 
 
 __all__ = ['Party', 'PurchaseRequest', 'BOM', 'Production', 'Purchase',
@@ -120,15 +122,6 @@ class Production(metaclass=PoolMeta):
                     'icon': 'tryton-go-home',
                     }
                 })
-        cls._error_messages.update({
-                'no_subcontract_warehouse': ('The party "%s" has no production '
-                    'location.'),
-                'no_warehouse_production_location': ('The warehouse "%s" has '
-                    'no production location.'),
-                'no_incoming_shipment': ('The production "%s" has no incoming '
-                    'shipment. You must process the purchase before the '
-                    'production can be assigned.'),
-                })
 
     def get_supplier(self, name):
         return (self.purchase_request.party.id if self.purchase_request and
@@ -197,13 +190,15 @@ class Production(metaclass=PoolMeta):
                 continue
             subcontract_warehouse = production._get_subcontract_warehouse()
             if not subcontract_warehouse:
-                cls.raise_user_error('no_subcontract_warehouse', (
-                    production.purchase_request.party.rec_name, ))
+                raise UserError(gettext(
+                    'production_subcontract.no_subcontract_warehouse',
+                    party=production.purchase_request.party.rec_name))
             production.destination_warehouse = production.warehouse
             production.warehouse = subcontract_warehouse
             if not production.warehouse.production_location:
-                cls.raise_user_error('no_warehouse_production_location', (
-                    production.warehouse.rec_name, ))
+                raise UserError(gettext(
+                    'production_subcontract.no_warehouse_production_location',
+                    warehouse=production.warehouse.rec_name))
             production.location = production.warehouse.production_location
 
             from_location = production.warehouse.storage_location
@@ -280,8 +275,9 @@ class Production(metaclass=PoolMeta):
         for p in productions:
             if p.purchase_request:
                 if not p.incoming_shipment:
-                    cls.raise_user_error('no_incoming_shipment', (
-                        p.number,))
+                    raise UserError(gettext(
+                        'production_subcontract.no_incoming_shipment',
+                            production=p.number))
         return super(Production, cls).assign_try(productions)
 
     @classmethod
