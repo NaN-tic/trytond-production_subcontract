@@ -32,5 +32,10 @@
             <field name="model"
                 search="[('model', '=', 'production')]"/>
         </record>
+
+        <record model="ir.ui.icon" id="go_home_icon">
+            <field name="name">tryton-go-home</field>
+            <field name="path">icons/tryton-go-home.svg</field>
+        </record>
     </data>
 </tryton>
