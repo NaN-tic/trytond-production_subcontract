@@ -5,8 +5,7 @@
     <xpath expr="/form/field[@name='uom']" position="after">
         <label name="subcontract_product"/>
         <field name="subcontract_product"/>
-        <button name="create_purchase_request" string="Create Purchase Request"
-         colspan="2"/>
+        <button name="create_purchase_request" colspan="2"/>
     </xpath>
     <xpath expr="/form/notebook/page[@id='other']/field[@name='location']"
         position="after">
