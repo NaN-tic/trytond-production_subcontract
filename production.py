@@ -39,16 +39,15 @@ class PartyProductionWarehouse(ModelSQL, ValueMixin):
     def __register__(cls, module_name):
         pool = Pool()
         Party = pool.get('party.party')
-        TableHandler = backend.get('TableHandler')
         cursor = Transaction().connection.cursor()
-        exist = TableHandler.table_exist(cls._table)
+        exist = backend.TableHandler.table_exist(cls._table)
         table = cls.__table__()
         party = Party.__table__()
 
         super(PartyProductionWarehouse, cls).__register__(module_name)
 
         if not exist:
-            party_h = TableHandler(Party, module_name)
+            party_h = backend.TableHandler(Party, module_name)
             if party_h.column_exist('production_warehouse'):
                 query = table.insert(
                     [table.party, table.production_warehouse],
