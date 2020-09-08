@@ -69,6 +69,8 @@ Create supplier warehouse::
     >>> supplier_input.save()
     >>> supplier_output = Location(name='Supplier Output', type='storage')
     >>> supplier_output.save()
+    >>> supplier_lost_found = Location(name='Supplier Lost Foud', type='lost_found')
+    >>> supplier_lost_found.save()
     >>> supplier_production = Location(name='Supplier Production',
     ...     type='production')
     >>> supplier_production.save()
@@ -78,6 +80,7 @@ Create supplier warehouse::
     >>> supplier_warehouse.storage_location = supplier_storage
     >>> supplier_warehouse.input_location = supplier_input
     >>> supplier_warehouse.output_location = supplier_output
+    >>> supplier_warehouse.lost_found_location = supplier_lost_found
     >>> supplier_warehouse.production_location  = supplier_production
     >>> supplier_warehouse.save()
 
