@@ -2,7 +2,7 @@
 # copyright notices and license terms.
 from trytond.pool import Pool, PoolMeta
 from trytond.model import (Workflow, ModelView, fields, MultiValueMixin,
-    ValueMixin, ModelSQL)
+    ValueMixin, ModelSQL, dualmethod)
 from trytond.pyson import Eval, Bool
 from trytond.tools.multivalue import migrate_property
 from trytond import backend
@@ -267,7 +267,7 @@ class Production(metaclass=PoolMeta):
     def _sync_outputs_to_shipment(cls, productions):
         pass
 
-    @classmethod
+    @dualmethod
     @ModelView.button
     #@Workflow.transition('assigned')
     def assign_try(cls, productions):
