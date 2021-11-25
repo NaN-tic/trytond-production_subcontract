@@ -131,8 +131,8 @@ Create Components::
     >>> component1.cost_price = Decimal(1)
     >>> component1.save()
 
-    >>> meter, = ProductUom.find([('name', '=', 'Meter')])
-    >>> centimeter, = ProductUom.find([('name', '=', 'centimeter')])
+    >>> meter, = ProductUom.find([('symbol', '=', 'm')])
+    >>> centimeter, = ProductUom.find([('symbol', '=', 'cm')])
     >>> component2 = Product()
     >>> template2 = ProductTemplate()
     >>> template2.name = 'component 2'
