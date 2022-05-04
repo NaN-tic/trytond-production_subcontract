@@ -98,7 +98,9 @@ class Production(metaclass=PoolMeta):
         'Subcontract Product',  domain=[
             ('purchasable', '=', True),
             ('type', '=', 'service'),
-            ])
+            ], context={
+                'company': Eval('company'),
+            }, depends=['company'])
     purchase_request = fields.Many2One('purchase.request',
         'Purchase Request', readonly=True)
     incoming_shipment = fields.Many2One('stock.shipment.internal',
@@ -107,7 +109,10 @@ class Production(metaclass=PoolMeta):
         'Destination Warehouse', domain=[
             ('type', '=', 'warehouse'),
             ], readonly=True)
-    supplier = fields.Function(fields.Many2One('party.party', 'Supplier'),
+    supplier = fields.Function(fields.Many2One('party.party', 'Supplier',
+        context={
+            'company': Eval('company'),
+        }, depends=['company']),
         'get_supplier', searcher='search_supplier')
 
     @classmethod
