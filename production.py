@@ -246,8 +246,10 @@ class Production(metaclass=PoolMeta):
         return self.purchase_request.party.production_warehouse
 
     @classmethod
-    def compute_request(cls, product, warehouse, quantity, date, company):
-        req = super(Production, cls).compute_request(product, warehouse, quantity, date, company)
+    def compute_request(cls, product, warehouse, quantity, date, company,
+            order_point=None):
+        req = super(Production, cls).compute_request(product, warehouse,
+            quantity, date, company, order_point)
         if req.bom:
             req.subcontract_product = req.bom.subcontract_product
         return req
