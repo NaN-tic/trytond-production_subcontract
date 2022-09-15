@@ -304,6 +304,8 @@ Make a subcontract production::
     >>> purchase.save()
     >>> Purchase.quote([purchase.id], config.context)
     >>> purchase.reload()
+    >>> production.cost
+    Decimal('225.0000')
     >>> purchase.state
     'quotation'
     >>> Purchase.confirm([purchase.id], config.context)
@@ -330,3 +332,10 @@ Make a subcontract production::
     >>> production.reload()
     >>> production.state
     'running'
+    >>> Production.done([production.id], config.context)
+    >>> production.reload()
+    >>> production.state
+    'done'
+    >>> output, = production.outputs
+    >>> output.unit_price
+    Decimal('212.5000')
