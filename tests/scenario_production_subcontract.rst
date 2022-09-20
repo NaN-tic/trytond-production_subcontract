@@ -338,4 +338,4 @@ Make a subcontract production::
     'done'
     >>> output, = production.outputs
     >>> output.unit_price
-    Decimal('212.5000')
+    Decimal('112.5000')
