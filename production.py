@@ -9,6 +9,8 @@ from trytond import backend
 from trytond.transaction import Transaction
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
+from trytond.modules.product import round_price
+from decimal import Decimal
 
 
 __all__ = ['Party', 'PurchaseRequest', 'BOM', 'Production', 'Purchase',
@@ -296,6 +298,15 @@ class Production(metaclass=PoolMeta):
             x.incoming_shipment]
         if shipments:
             InternalShipment.assign_try(shipments)
+
+    def get_cost(self, name):
+        price = super().get_cost(name)
+        purchase = self.purchase_request and self.purchase_request.purchase
+        if not purchase:
+            return price
+
+        return price + purchase.untaxed_amount
+
 
 # TODO: Internal shipment should be updated each time outputs are changed
 
