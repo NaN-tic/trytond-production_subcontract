@@ -1,16 +1,21 @@
-# 
+#
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
-msgctxt "error:production:"
-msgid "The party \"%s\" has no production location."
-msgstr "El tercer \"%s\" no té ubicació de producció."
-
-msgctxt "error:production:"
-msgid "The warehouse \"%s\" has no production location."
-msgstr "El magatzem \"%s\" no té una ubicació de producció."
-
 msgctxt "field:party.party,production_warehouse:"
+msgid "Production Warehouse"
+msgstr "Magatzem producció"
+
+msgctxt "field:party.party,production_warehouses:"
+msgid "Warehouses"
+msgstr "Magatzems"
+
+msgctxt "field:party.party.production_warehouse,party:"
+msgid "Party"
+msgstr "Tercer"
+
+#, fuzzy
+msgctxt "field:party.party.production_warehouse,production_warehouse:"
 msgid "Production Warehouse"
 msgstr "Magatzem producció"
 
@@ -37,6 +42,30 @@ msgstr "Proveïdor"
 msgctxt "field:production.bom,subcontract_product:"
 msgid "Subcontract Product"
 msgstr "Producte subcontractat"
+
+msgctxt "model:ir.message,text:no_incoming_shipment"
+msgid ""
+"The production \"%(production)s\" has no incoming shipment. You must process"
+" the purchase before the production can be assigned."
+msgstr ""
+"No hi ha cap albarà d'entrada per la producció \"%(production)s\". Primer ha"
+" de processar la compra abans que la producció sigui reservada."
+
+msgctxt "model:ir.message,text:no_subcontract_warehouse"
+msgid "The party \"%(party)s\" has no production location."
+msgstr "El tercer \"%(party)s\" no disposa d'una ubicació de producció."
+
+msgctxt "model:ir.message,text:no_warehouse_production_location"
+msgid "The warehouse \"%(warehouse)s\" has no production location."
+msgstr "El magatzem \"%(warehouse)s\" no disposa d'una ubicació de producció."
+
+msgctxt "model:ir.model.button,string:create_purchase_request_button"
+msgid "Create Purchase Request"
+msgstr "Crea sol·licitud de compra"
+
+msgctxt "model:party.party.production_warehouse,name:"
+msgid "Party Lang"
+msgstr "Idioma del tercer"
 
 msgctxt "view:production:"
 msgid "Create Purchase Request"

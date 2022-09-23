@@ -1,16 +1,20 @@
-# 
+#
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
-msgctxt "error:production:"
-msgid "The party \"%s\" has no production location."
-msgstr ""
-
-msgctxt "error:production:"
-msgid "The warehouse \"%s\" has no production location."
-msgstr "El almacén \"%s\" no tiene una ubicació de producción."
-
 msgctxt "field:party.party,production_warehouse:"
+msgid "Production Warehouse"
+msgstr "Almacén producción"
+
+msgctxt "field:party.party,production_warehouses:"
+msgid "Warehouses"
+msgstr "Almacenes"
+
+msgctxt "field:party.party.production_warehouse,party:"
+msgid "Party"
+msgstr "Tercero"
+
+msgctxt "field:party.party.production_warehouse,production_warehouse:"
 msgid "Production Warehouse"
 msgstr "Almacén producción"
 
@@ -37,6 +41,30 @@ msgstr "Proveedor"
 msgctxt "field:production.bom,subcontract_product:"
 msgid "Subcontract Product"
 msgstr "Producto subcontractado"
+
+msgctxt "model:ir.message,text:no_incoming_shipment"
+msgid ""
+"The production \"%(production)s\" has no incoming shipment. You must process"
+" the purchase before the production can be assigned."
+msgstr ""
+"No hay ningún albarán de entrada para la producción \"%(production)s\". "
+"Primero debe de procesar la compra antes que la producción sea reservada."
+
+msgctxt "model:ir.message,text:no_subcontract_warehouse"
+msgid "The party \"%(party)s\" has no production location."
+msgstr "El tercero \"%(party)s\" no dispone de una ubicación de producción."
+
+msgctxt "model:ir.message,text:no_warehouse_production_location"
+msgid "The warehouse \"%(warehouse)s\" has no production location."
+msgstr "El almacén \"%(party)s\" no dispone de una ubicación de producción."
+
+msgctxt "model:ir.model.button,string:create_purchase_request_button"
+msgid "Create Purchase Request"
+msgstr "Crear solicitud de compra"
+
+msgctxt "model:party.party.production_warehouse,name:"
+msgid "Party Lang"
+msgstr "Idioma del tercero"
 
 msgctxt "view:production:"
 msgid "Create Purchase Request"
