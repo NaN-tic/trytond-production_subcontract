@@ -10,9 +10,7 @@ this repository contains the full copyright notices and license terms. -->
         <field name="text">The warehouse "%(warehouse)s" has no production location.</field>
     </record>
     <record model="ir.message" id="no_incoming_shipment">
-        <field name="text">The production "%(production)s" has no incoming 
-            shipment. You must process the purchase before the
-            production can be assigned.</field>
+        <field name="text">The production "%(production)s" has no incoming shipment. You must process the purchase before the production can be assigned.</field>
     </record>
     </data>
 </tryton>
