@@ -143,6 +143,7 @@ class Production(metaclass=PoolMeta):
             default = {}
         default['purchase_request'] = None
         default['incoming_shipment'] = None
+        default['destination_warehouse'] = None
         return super(Production, cls).copy(productions, default)
 
     @classmethod
