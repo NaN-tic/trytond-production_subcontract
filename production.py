@@ -31,7 +31,7 @@ class PartyProductionWarehouse(ModelSQL, ValueMixin):
     "Party Lang"
     __name__ = 'party.party.production_warehouse'
     party = fields.Many2One(
-        'party.party', "Party", ondelete='CASCADE', select=True)
+        'party.party', "Party", ondelete='CASCADE')
     production_warehouse = fields.Many2One('stock.location',
             'Production Warehouse', domain=[
                 ('type', '=', 'warehouse'),
