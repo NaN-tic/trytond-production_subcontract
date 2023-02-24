@@ -248,7 +248,6 @@ Make a production::
     >>> production.state
     'waiting'
     >>> Production.assign_try([production.id], config.context)
-    True
     >>> production.reload()
     >>> all(i.state == 'assigned' for i in production.inputs)
     True
@@ -321,13 +320,11 @@ Make a subcontract production::
     >>> internal.state
     'waiting'
     >>> Internal.assign_try([internal.id], config.context)
-    True
     >>> Internal.done([internal.id], config.context)
     >>> internal.reload()
     >>> internal.state
     'done'
     >>> Production.assign_try([production.id], config.context)
-    True
     >>> Production.run([production.id], config.context)
     >>> production.reload()
     >>> production.state
