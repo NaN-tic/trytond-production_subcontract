@@ -4,7 +4,6 @@ from trytond.pool import Pool, PoolMeta
 from trytond.model import (Workflow, ModelView, fields, MultiValueMixin,
     ValueMixin, ModelSQL, dualmethod)
 from trytond.pyson import Eval, Bool
-from trytond.tools.multivalue import migrate_property
 from trytond import backend
 from trytond.transaction import Transaction
 from trytond.i18n import gettext
@@ -36,36 +35,6 @@ class PartyProductionWarehouse(ModelSQL, ValueMixin):
             'Production Warehouse', domain=[
                 ('type', '=', 'warehouse'),
                 ])
-
-    @classmethod
-    def __register__(cls, module_name):
-        pool = Pool()
-        Party = pool.get('party.party')
-        cursor = Transaction().connection.cursor()
-        exist = backend.TableHandler.table_exist(cls._table)
-        table = cls.__table__()
-        party = Party.__table__()
-
-        super(PartyProductionWarehouse, cls).__register__(module_name)
-
-        if not exist:
-            party_h = backend.TableHandler(Party, module_name)
-            if party_h.column_exist('production_warehouse'):
-                query = table.insert(
-                    [table.party, table.production_warehouse],
-                    party.select(party.id, party.production_warehouse))
-                cursor.execute(*query)
-                party_h.drop_column('production_warehouse')
-            else:
-                cls._migrate_property([], [], [])
-
-    @classmethod
-    def _migrate_property(cls, field_names, value_names, fields):
-        field_names.append('production_warehouse')
-        value_names.append('production_warehouse')
-        migrate_property(
-            'party.party', field_names, cls, value_names,
-            parent='party', fields=fields)
 
 
 class PurchaseRequest(metaclass=PoolMeta):
