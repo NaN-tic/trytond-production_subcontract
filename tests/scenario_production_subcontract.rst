@@ -173,7 +173,7 @@ Create Bill of Material::
     >>> bom.inputs.append(input2)
     >>> input2.product = component2
     >>> input2.quantity = 150
-    >>> input2.uom = centimeter
+    >>> input2.unit = centimeter
     >>> output = BOMOutput()
     >>> bom.outputs.append(output)
     >>> output.product = product
@@ -299,6 +299,9 @@ Make a subcontract production::
     >>> create_purchase.execute('start')
     >>> purchase_request.reload()
     >>> purchase = purchase_request.purchase
+    >>> line = purchase.lines[0]
+    >>> line.unit_price = line.product.cost_price
+    >>> line.save()
     >>> purchase.payment_term = payment_term
     >>> purchase.save()
     >>> Purchase.quote([purchase.id], config.context)

@@ -145,7 +145,7 @@ class Production(metaclass=PoolMeta):
         return PurchaseRequest(
             product=self.subcontract_product,
             company=self.company,
-            uom=self.subcontract_product.default_uom,
+            unit=self.subcontract_product.default_uom,
             quantity=self.quantity,
             computed_quantity=self.quantity,
             warehouse=self.warehouse,
@@ -211,7 +211,7 @@ class Production(metaclass=PoolMeta):
             product=output.product,
             # TODO: Support lots
             quantity=output.quantity,
-            uom=output.uom,
+            unit=output.unit,
             )
 
     def _get_subcontract_warehouse(self):
