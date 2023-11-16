@@ -101,7 +101,7 @@ class Production(metaclass=PoolMeta):
             ('purchasable', '=', True),
             ('type', '=', 'service'),
             ], context={
-                'company': Eval('company'),
+                'company': Eval('company', -1),
             }, depends=['company'])
     purchase_request = fields.Many2One('purchase.request',
         'Purchase Request', readonly=True)
@@ -113,7 +113,7 @@ class Production(metaclass=PoolMeta):
             ], readonly=True)
     supplier = fields.Function(fields.Many2One('party.party', 'Supplier',
         context={
-            'company': Eval('company'),
+            'company': Eval('company', -1),
         }, depends=['company']),
         'get_supplier', searcher='search_supplier')
 
