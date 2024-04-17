@@ -30,7 +30,7 @@
         <record model="ir.model.button" id="create_purchase_request_button">
             <field name="name">create_purchase_request</field>
             <field name="string">Create Purchase Request</field>
-            <field name="model" search="[('model', '=', 'production')]"/>
+            <field name="model">production</field>
         </record>
 
         <record model="ir.ui.icon" id="go_home_icon">
