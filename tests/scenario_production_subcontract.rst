@@ -257,7 +257,7 @@ Make a production::
     True
     >>> len(set(i.effective_date == today for i in production.inputs))
     1
-    >>> Production.done([production.id], config.context)
+    >>> Production.do([production.id], config.context)
     >>> production.reload()
     >>> output, = production.outputs
     >>> output.state
@@ -323,7 +323,7 @@ Make a subcontract production::
     >>> internal.state
     'waiting'
     >>> Internal.assign_try([internal.id], config.context)
-    >>> Internal.done([internal.id], config.context)
+    >>> Internal.do([internal.id], config.context)
     >>> internal.reload()
     >>> internal.state
     'done'
@@ -332,7 +332,7 @@ Make a subcontract production::
     >>> production.reload()
     >>> production.state
     'running'
-    >>> Production.done([production.id], config.context)
+    >>> Production.do([production.id], config.context)
     >>> production.reload()
     >>> production.state
     'done'

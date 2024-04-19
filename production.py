@@ -253,9 +253,9 @@ class Production(metaclass=PoolMeta):
     @classmethod
     @ModelView.button
     @Workflow.transition('done')
-    def done(cls, productions):
+    def do(cls, productions):
         InternalShipment = Pool().get('stock.shipment.internal')
-        super(Production, cls).done(productions)
+        super(Production, cls).do(productions)
         shipments = [x.incoming_shipment for x in productions if
             x.incoming_shipment]
         if shipments:
