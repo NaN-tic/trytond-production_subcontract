@@ -56,7 +56,7 @@ msgstr "El tercero \"%(party)s\" no dispone de una ubicación de producción."
 
 msgctxt "model:ir.message,text:no_warehouse_production_location"
 msgid "The warehouse \"%(warehouse)s\" has no production location."
-msgstr "El almacén \"%(party)s\" no dispone de una ubicación de producción."
+msgstr "El almacén \"%(warehouse)s\" no dispone de una ubicación de producción."
 
 msgctxt "model:ir.model.button,string:create_purchase_request_button"
 msgid "Create Purchase Request"
