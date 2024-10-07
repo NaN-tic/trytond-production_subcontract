@@ -207,7 +207,8 @@ class Production(metaclass=PoolMeta):
             )
 
     def _get_subcontract_warehouse(self):
-        return self.purchase_request.party.production_warehouse
+        return (self.purchase_request and self.purchase_request.party
+            and self.purchase_request.party.production_warehouse)
 
     @classmethod
     def compute_request(cls, product, warehouse, quantity, date, company,
