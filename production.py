@@ -263,13 +263,18 @@ class Production(metaclass=PoolMeta):
             InternalShipment.assign_try(shipments)
 
     def get_cost(self, name):
+        pool = Pool()
+        Uom = pool.get('product.uom')
+
         price = super().get_cost(name)
-        purchase = self.purchase_request and self.purchase_request.purchase
-        if not purchase:
+        line = self.purchase_request and self.purchase_request.purchase_line
+        if not line:
             return price
-
-        return price + purchase.untaxed_amount
-
+        
+        quantity = Uom.compute_qty(
+            self.uom, self.quantity, self.product.default_uom)
+        
+        return price + Decimal(quantity) * line.unit_price
 
 # TODO: Internal shipment should be updated each time outputs are changed
 
