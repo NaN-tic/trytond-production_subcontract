@@ -6,6 +6,7 @@ from trytond.model import (Workflow, ModelView, fields, MultiValueMixin,
 from trytond.pyson import Eval, Bool
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
+from decimal import Decimal
 
 
 class Party(MultiValueMixin, metaclass=PoolMeta):
