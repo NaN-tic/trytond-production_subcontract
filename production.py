@@ -264,18 +264,34 @@ class Production(metaclass=PoolMeta):
             InternalShipment.assign_try(shipments)
 
     def get_cost(self, name):
+        cost = super().get_cost(name)
+        subcontract_cost = self.get_subcontract_cost()
+
+        return cost + subcontract_cost
+    
+    @fields.depends('purchase_request', methods=['get_subcontract_cost'])
+    def on_change_with_cost(self):
+        cost = super().on_change_with_cost()
+        subcontract_cost = self.get_subcontract_cost()
+
+        return cost + subcontract_cost
+        
+    def get_subcontract_cost(self):
         pool = Pool()
         Uom = pool.get('product.uom')
 
-        price = super().get_cost(name)
+        cost = Decimal(0)
         line = self.purchase_request and self.purchase_request.purchase_line
         if not line:
-            return price
+            return cost
         
         quantity = Uom.compute_qty(
             self.uom, self.quantity, self.product.default_uom)
-        
-        return price + Decimal(quantity) * line.unit_price
+        unit_price = Uom.compute_price(
+            line.unit, line.unit_price, self.product.default_uom)
+        cost = Decimal(quantity) * unit_price
+
+        return cost
 
 # TODO: Internal shipment should be updated each time outputs are changed
 
