@@ -286,7 +286,7 @@ class Production(metaclass=PoolMeta):
             return cost
         
         quantity = Uom.compute_qty(
-            self.uom, self.quantity, self.product.default_uom)
+            self.unit, self.quantity, self.product.default_uom)
         unit_price = Uom.compute_price(
             line.unit, line.unit_price, self.product.default_uom)
         cost = Decimal(quantity) * unit_price
