@@ -50,15 +50,6 @@ class Test(unittest.TestCase):
         revenue = accounts['revenue']
         expense = accounts['expense']
 
-        # Create payment term
-        PaymentTerm = Model.get('account.invoice.payment_term')
-        payment_term = PaymentTerm(name='Term')
-        line = payment_term.lines.new(type='percent', ratio=Decimal('.5'))
-        delta = line.relativedeltas.new(days=20)
-        line = payment_term.lines.new(type='remainder')
-        delta = line.relativedeltas.new(days=40)
-        payment_term.save()
-
         # Create supplier warehouse
         Location = Model.get('stock.location')
         supplier_storage = Location(name='Supplier Storage', type='storage')
@@ -278,7 +269,6 @@ class Test(unittest.TestCase):
         line = purchase.lines[0]
         line.unit_price = line.product.cost_price
         line.save()
-        purchase.payment_term = payment_term
         purchase.save()
         Purchase.quote([purchase.id], config.context)
         purchase.reload()
