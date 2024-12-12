@@ -268,14 +268,14 @@ class Production(metaclass=PoolMeta):
         subcontract_cost = self.get_subcontract_cost()
 
         return cost + subcontract_cost
-    
+
     @fields.depends('purchase_request', methods=['get_subcontract_cost'])
     def on_change_with_cost(self):
         cost = super().on_change_with_cost()
         subcontract_cost = self.get_subcontract_cost()
 
         return cost + subcontract_cost
-        
+
     def get_subcontract_cost(self):
         pool = Pool()
         Uom = pool.get('product.uom')
@@ -284,7 +284,7 @@ class Production(metaclass=PoolMeta):
         line = self.purchase_request and self.purchase_request.purchase_line
         if not line:
             return cost
-        
+
         quantity = Uom.compute_qty(
             self.unit, self.quantity, self.product.default_uom)
         unit_price = Uom.compute_price(
