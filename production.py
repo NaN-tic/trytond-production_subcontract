@@ -6,6 +6,7 @@ from trytond.model import (Workflow, ModelView, fields, MultiValueMixin,
 from trytond.pyson import Eval, Bool
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
+from trytond.modules.product import round_price
 from decimal import Decimal
 
 
@@ -275,7 +276,7 @@ class Production(metaclass=PoolMeta):
         quantity = Uom.compute_qty(
             self.uom, self.quantity, self.product.default_uom)
 
-        return cost + Decimal(quantity) * line.unit_price
+        return round_price(cost + (Decimal(quantity) * line.unit_price))
 
 # TODO: Internal shipment should be updated each time outputs are changed
 
