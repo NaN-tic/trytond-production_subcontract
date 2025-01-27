@@ -206,6 +206,7 @@ class Production(metaclass=PoolMeta):
             # TODO: Support lots
             quantity=output.quantity,
             unit=output.unit,
+            origin=getattr(self.purchase_request, 'purchase_line', None),
             )
 
     def _get_subcontract_warehouse(self):
