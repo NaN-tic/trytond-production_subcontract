@@ -39,10 +39,10 @@ class PurchaseRequest(metaclass=PoolMeta):
         Model = Pool().get('ir.model')
         res = super(PurchaseRequest, cls).get_origin()
         models = Model.search([
-                ('model', '=', 'production'),
+                ('name', '=', 'production'),
                 ])
         for model in models:
-            res.append([model.model, model.name])
+            res.append([model.name, model.string])
         return res
 
 
