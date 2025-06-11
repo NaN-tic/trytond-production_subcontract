@@ -64,6 +64,7 @@ class Test(unittest.TestCase):
         supplier_production = Location(name='Supplier Production',
                                        type='production')
         supplier_production.save()
+
         supplier_warehouse = Location()
         supplier_warehouse.type = 'warehouse'
         supplier_warehouse.name = 'Supplier Warehouse'
@@ -253,6 +254,8 @@ class Test(unittest.TestCase):
         self.assertEqual(output.quantity, 2)
         production.subcontract_product = subcontract
         production.save()
+        # production warehouse is our warehouse
+        self.assertEqual(production.warehouse, warehouse)
         self.assertEqual(production.cost, Decimal('25.0000'))
         Production.wait([production.id], config.context)
         production.reload()
@@ -260,6 +263,7 @@ class Test(unittest.TestCase):
         Production.create_purchase_request([production.id], config.context)
         production.reload()
         purchase_request = production.purchase_request
+
         create_purchase = Wizard('purchase.request.create_purchase',
                                  [purchase_request])
         create_purchase.form.party = party
@@ -277,8 +281,13 @@ class Test(unittest.TestCase):
         Purchase.confirm([purchase.id], config.context)
         purchase.reload()
         self.assertEqual(purchase.state, 'processing')
+
         production.reload()
+        # confirm purchase, replace production warehouse to supplier warehouse
+        self.assertEqual(production.warehouse, supplier_warehouse)
+        self.assertEqual(production.destination_warehouse, warehouse)
         self.assertEqual(production.incoming_shipment.id, 1)
+
         internal = production.incoming_shipment
         Internal.wait([internal.id], config.context)
         internal.reload()
