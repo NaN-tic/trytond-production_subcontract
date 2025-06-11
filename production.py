@@ -173,6 +173,14 @@ class Production(metaclass=PoolMeta):
 
             from_location = production.warehouse.storage_location
             to_location = production.destination_warehouse.storage_location
+            # in case production warehouse is the same party.production_warehouse,
+            # can not create internal shipments
+            if from_location == to_location:
+                raise UserError(gettext(
+                    'production_subcontract.msg_same_production_location',
+                    production=production.rec_name,
+                    warehouse=from_location.rec_name))
+
             shipment = ShipmentInternal()
             shipment.from_location = from_location
             shipment.to_location = to_location
