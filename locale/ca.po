@@ -14,7 +14,6 @@ msgctxt "field:party.party.production_warehouse,party:"
 msgid "Party"
 msgstr "Tercer"
 
-#, fuzzy
 msgctxt "field:party.party.production_warehouse,production_warehouse:"
 msgid "Production Warehouse"
 msgstr "Magatzem producció"
