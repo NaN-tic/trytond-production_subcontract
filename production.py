@@ -284,7 +284,8 @@ class Production(metaclass=PoolMeta):
         quantity = Uom.compute_qty(
             self.unit, self.quantity, self.product.default_uom)
 
-        return round_price(cost + Decimal(quantity) * line.unit_price)
+        return round_price(cost + Decimal(quantity)
+            * (line.unit_price or Decimal('0')))
 
 # TODO: Internal shipment should be updated each time outputs are changed
 
