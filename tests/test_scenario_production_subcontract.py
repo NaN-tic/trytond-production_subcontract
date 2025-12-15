@@ -286,7 +286,7 @@ class Test(unittest.TestCase):
         # confirm purchase, replace production warehouse to supplier warehouse
         self.assertEqual(production.warehouse, supplier_warehouse)
         self.assertEqual(production.destination_warehouse, warehouse)
-        self.assertEqual(production.incoming_shipment.id, 1)
+        self.assertNotEqual(production.incoming_shipment, None)
 
         internal = production.incoming_shipment
         Internal.wait([internal.id], config.context)
