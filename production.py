@@ -207,6 +207,7 @@ class Production(metaclass=PoolMeta):
 
     def _get_incoming_shipment_move(self, output, from_location, to_location):
         Move = Pool().get('stock.move')
+
         return Move(
             from_location=from_location,
             to_location=to_location,
@@ -214,7 +215,7 @@ class Production(metaclass=PoolMeta):
             # TODO: Support lots
             quantity=output.quantity,
             unit=output.unit,
-            origin=getattr(self.purchase_request, 'purchase_line', None),
+            origin=self.purchase_request if self.purchase_request else None,
             )
 
     def _get_subcontract_warehouse(self):
@@ -315,3 +316,14 @@ class Purchase(metaclass=PoolMeta):
                 ])
         if productions:
             Production.process_purchase_request(productions)
+
+
+class Move(metaclass=PoolMeta):
+    __name__ = 'stock.move'
+
+    @classmethod
+    def _get_origin(cls):
+        models = super()._get_origin()
+        if not 'purchase.request' in models:
+            models.append('purchase.request')
+        return models
