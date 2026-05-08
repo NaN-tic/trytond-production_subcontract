@@ -12,4 +12,5 @@ def register():
         production.Production,
         production.Purchase,
         production.PartyProductionWarehouse,
+        production.Move,
         module='production_subcontract', type_='model')
