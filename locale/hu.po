@@ -1,0 +1,88 @@
+#
+msgid ""
+msgstr ""
+"Language: hu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "field:party.party,production_warehouse:"
+msgid "Production Warehouse"
+msgstr "Gyártási raktár"
+
+msgctxt "field:party.party,production_warehouses:"
+msgid "Warehouses"
+msgstr "Raktárak"
+
+msgctxt "field:party.party.production_warehouse,party:"
+msgid "Party"
+msgstr "Ügyfél"
+
+msgctxt "field:party.party.production_warehouse,production_warehouse:"
+msgid "Production Warehouse"
+msgstr "Gyártási raktár"
+
+msgctxt "field:production,destination_warehouse:"
+msgid "Destination Warehouse"
+msgstr "Célraktár"
+
+msgctxt "field:production,incoming_shipment:"
+msgid "Incoming Shipment"
+msgstr "Bejövő szállítmány"
+
+msgctxt "field:production,purchase_request:"
+msgid "Purchase Request"
+msgstr "Beszerzési igény"
+
+msgctxt "field:production,subcontract_product:"
+msgid "Subcontract Product"
+msgstr "Alvállalkozói termék"
+
+msgctxt "field:production,supplier:"
+msgid "Supplier"
+msgstr "Szállító"
+
+msgctxt "field:production.bom,subcontract_product:"
+msgid "Subcontract Product"
+msgstr "Alvállalkozói termék"
+
+#, python-format
+msgctxt "model:ir.message,text:no_incoming_shipment"
+msgid ""
+"The production \"%(production)s\" has no incoming shipment. You must process"
+" the purchase before the production can be assigned."
+msgstr ""
+"A(z) „%(production)s” gyártásnak nincs bejövő szállítmánya. Lefoglalás előtt"
+" fel kell dolgozni a beszerzést."
+
+#, python-format
+msgctxt "model:ir.message,text:no_subcontract_warehouse"
+msgid "The party \"%(party)s\" has no production location."
+msgstr "A(z) „%(party)s” partnernek nincs gyártási helye."
+
+#, python-format
+msgctxt "model:ir.message,text:no_warehouse_production_location"
+msgid "The warehouse \"%(warehouse)s\" has no production location."
+msgstr "A(z) „%(warehouse)s” raktárnak nincs gyártási helye."
+
+msgctxt "model:ir.model.button,string:create_purchase_request_button"
+msgid "Create Purchase Request"
+msgstr "Beszerzési igény létrehozása"
+
+msgctxt "model:party.party.production_warehouse,name:"
+msgid "Party Lang"
+msgstr "Partner nyelve"
+
+msgctxt "view:production:"
+msgid "Create Purchase Request"
+msgstr "Beszerzési igény létrehozása"
+
+#, python-format
+msgctxt "model:ir.message,text:msg_same_production_location"
+msgid ""
+"The production \"%(production)s\" can not create internal shipment because "
+"warehouse production and party production are the same: \"%(warehouse)s\"."
+msgstr ""
+"A(z) „%(production)s” gyártáshoz nem hozható létre belső szállítmány, mert a"
+" raktári és a partneri gyártási hely megegyezik: „%(warehouse)s”."
