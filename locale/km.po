@@ -1,0 +1,88 @@
+#
+msgid ""
+msgstr ""
+"Language: km\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgctxt "field:party.party,production_warehouse:"
+msgid "Production Warehouse"
+msgstr "ឃ្លាំងផលិតកម្ម"
+
+msgctxt "field:party.party,production_warehouses:"
+msgid "Warehouses"
+msgstr "ឃ្លាំង"
+
+msgctxt "field:party.party.production_warehouse,party:"
+msgid "Party"
+msgstr "ភាគី"
+
+msgctxt "field:party.party.production_warehouse,production_warehouse:"
+msgid "Production Warehouse"
+msgstr "ឃ្លាំងផលិតកម្ម"
+
+msgctxt "field:production,destination_warehouse:"
+msgid "Destination Warehouse"
+msgstr "ឃ្លាំងគោលដៅ"
+
+msgctxt "field:production,incoming_shipment:"
+msgid "Incoming Shipment"
+msgstr "ការដឹកជញ្ជូនចូល"
+
+msgctxt "field:production,purchase_request:"
+msgid "Purchase Request"
+msgstr "សំណើទិញ"
+
+msgctxt "field:production,subcontract_product:"
+msgid "Subcontract Product"
+msgstr "ផលិតផលផលិតតាមកិច្ចសន្យាបន្ត"
+
+msgctxt "field:production,supplier:"
+msgid "Supplier"
+msgstr "អ្នកផ្គត់ផ្គង់"
+
+msgctxt "field:production.bom,subcontract_product:"
+msgid "Subcontract Product"
+msgstr "ផលិតផលផលិតតាមកិច្ចសន្យាបន្ត"
+
+#, python-format
+msgctxt "model:ir.message,text:no_incoming_shipment"
+msgid ""
+"The production \"%(production)s\" has no incoming shipment. You must process "
+"the purchase before the production can be assigned."
+msgstr ""
+"ផលិតកម្ម «%(production)s» មិនមានការដឹកជញ្ជូនចូលទេ។ "
+"ត្រូវដំណើរការការទិញមុនបម្រុងស្តុកសម្រាប់ផលិតកម្ម។"
+
+#, python-format
+msgctxt "model:ir.message,text:no_subcontract_warehouse"
+msgid "The party \"%(party)s\" has no production location."
+msgstr "ភាគី «%(party)s» មិនមានទីតាំងផលិតកម្មទេ។"
+
+#, python-format
+msgctxt "model:ir.message,text:no_warehouse_production_location"
+msgid "The warehouse \"%(warehouse)s\" has no production location."
+msgstr "ឃ្លាំង «%(warehouse)s» មិនមានទីតាំងផលិតកម្មទេ។"
+
+msgctxt "model:ir.model.button,string:create_purchase_request_button"
+msgid "Create Purchase Request"
+msgstr "បង្កើតសំណើទិញ"
+
+msgctxt "model:party.party.production_warehouse,name:"
+msgid "Party Lang"
+msgstr "ភាសារបស់ភាគី"
+
+msgctxt "view:production:"
+msgid "Create Purchase Request"
+msgstr "បង្កើតសំណើទិញ"
+
+#, python-format
+msgctxt "model:ir.message,text:msg_same_production_location"
+msgid ""
+"The production \"%(production)s\" can not create internal shipment because "
+"warehouse production and party production are the same: \"%(warehouse)s\"."
+msgstr ""
+"មិនអាចបង្កើតការដឹកជញ្ជូនផ្ទៃក្នុងសម្រាប់ផលិតកម្ម «%(production)s» បានទេ "
+"ព្រោះទីតាំងផលិតកម្មរបស់ឃ្លាំង និងរបស់ភាគីដូចគ្នា៖ «%(warehouse)s»។"
